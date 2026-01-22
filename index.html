@@ -203,9 +203,8 @@
     </div>
 
     <div id="tab-cetak" class="tab-content hidden">
-        <div class="no-print card" style="text-align:center; display: flex; gap: 10px; justify-content: center;">
+        <div class="no-print card" style="text-align:center;">
             <button class="btn btn-blue" onclick="window.print()">MULAI CETAK DOKUMEN</button>
-            <button class="btn btn-green" onclick="downloadWord()">DOWNLOAD WORD (.DOC)</button>
         </div>
         
         <div id="printArea" class="print-only">
@@ -294,50 +293,6 @@
     let cacheTP = [];
     let currentUser = { role: null, kls: null, label: "" };
 
-    // FUNGSI BARU: DOWNLOAD WORD DENGAN PROTEKSI FORMAT
-    function downloadWord() {
-        const kls = document.getElementById('selKls').value;
-        const mapel = document.getElementById('selMapel').value;
-        const fontBase = (kls <= 2) ? "Arial" : "Times New Roman";
-        
-        [cite_start]// Header khusus agar Word mengenali ukuran A4 dan font [cite: 189, 199, 200]
-        const header = `
-            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-            <head><meta charset='utf-8'>
-            <style>
-                @page Section1 {size:595.3pt 841.9pt; margin:1.5cm 1.5cm 2cm 1.5cm; mso-header-margin:35.4pt; mso-footer-margin:35.4pt; mso-paper-source:0;}
-                div.Section1 {page:Section1;}
-                body { font-family: '${fontBase}', sans-serif; font-size: 12pt; line-height: 1.4; }
-                table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-                th, td { border: 1px solid black; padding: 6px; font-family: '${fontBase}'; font-size: 11pt; }
-                .kop { text-align: center; border-bottom: 4px double black; padding-bottom: 10px; margin-bottom: 20px; }
-                .soal-row { display: block; margin-bottom: 15px; clear: both; }
-                .page-section { page-break-after: always; }
-                h3 { text-align: center; text-transform: uppercase; margin: 5px 0; }
-                .grid-2-col { display: table; width: 100%; }
-                .grid-2-col div { display: table-cell; width: 50%; padding-bottom: 5px; }
-                img { max-width: 100%; height: auto; }
-            </style>
-            </head><body><div class="Section1">`;
-            
-        const footer = "</div></body></html>";
-        
-        [cite_start]// Ambil konten HTML dari area cetak [cite: 197]
-        const content = document.getElementById("printArea").innerHTML;
-        const combined = header + content + footer;
-        
-        [cite_start]// Konversi ke blob [cite: 321]
-        const blob = new Blob(['\ufeff', combined], { type: 'application/msword' });
-        const url = URL.createObjectURL(blob);
-        
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `Naskah_Soal_${mapel}_Kelas_${kls}.doc`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
     function updateLogo(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
@@ -394,21 +349,26 @@
         const mapelDasar = ["Pendidikan Pancasila", "Matematika", "Seni Budaya", "Bahasa Indonesia", "Bahasa Sunda"];
         
         let opts = [];
-        if(currentUser.role === 'guru_pai') { opts = ["PAI"]; } 
-        else if(currentUser.role === 'guru_inggris') { opts = ["Bahasa Inggris"]; } 
+        if(currentUser.role === 'guru_pai') { 
+            opts = ["PAI"]; 
+        } 
+        else if(currentUser.role === 'guru_inggris') { 
+            opts = ["Bahasa Inggris"]; 
+        } 
         else if(currentUser.role === 'admin') {
+            // PERBAIKAN: Admin mendapatkan akses semua mata pelajaran termasuk PAI dan Inggris
             opts = ["PAI", ...mapelDasar, "Bahasa Inggris"];
             if(parseInt(k) >= 3) opts.push("IPAS");
         }
         else { 
-            opts = [...mapelDasar];
+            opts = [...mapelDasar]; 
             if(parseInt(k) >= 3) opts.push("IPAS"); 
         }
         
         selMapel.innerHTML = opts.map(mapel => `<option value="${mapel}" ${mapel === m ? 'selected' : ''}>${mapel}</option>`).join('');
         document.getElementById('od-w').style.display = (k <= 2) ? "none" : "block";
         document.getElementById('f-engine').className = "page-section " + (k <= 2 ? "font-arial" : "font-tnr");
-        
+
         db.ref('kkg_tp').on('value', snap => {
             cacheTP = snap.val() ? Object.values(snap.val()).filter(x => x.k == k && x.m == selMapel.value) : [];
             document.getElementById('bodyTP').innerHTML = cacheTP.map(d => `<tr><td>${d.e}</td><td>${d.tp}</td><td><button class="btn-sm btn-blue" onclick="editTP('${d.id}')">Edit</button><button class="btn-sm btn-red" onclick="deleteTP('${d.id}')">X</button></td></tr>`).join('');
@@ -432,14 +392,15 @@
         const teksKls = ["Satu", "Dua", "Tiga", "Empat", "Lima", "Enam"];
         document.getElementById('p-mapel-val').innerText = document.getElementById('selMapel').value;
         document.getElementById('p-kls-val').innerText = romawi[kls-1] + " (" + teksKls[kls-1] + ")";
+
         document.getElementById('p-kisi').innerHTML = soals.map((s, i) => {
             const dataTP = cacheTP.find(x => x.tp.trim() === s.tp.trim());
             return `<tr><td>${i+1}</td><td>${dataTP ? dataTP.e : "-"}</td><td>${s.tp}</td><td>${s.ind}</td><td>${s.lv}</td><td>${s.bentuk}</td></tr>`;
         }).join('');
-        
+
         const pg = soals.filter(x => x.bentuk === 'PG');
         const esai = soals.filter(x => x.bentuk === 'Esai');
-        
+
         document.getElementById('p-naskah').innerHTML = pg.map((s, i) => {
             const hasImgOpsi = s.imgOA || s.imgOB || s.imgOC || s.imgOD;
             const totalChar = (s.oa + s.ob + s.oc + (s.od || "")).length;
@@ -465,8 +426,7 @@
     }
 
     function updateStats(soals) {
-        const t = soals.length;
-        if (t === 0) return;
+        const t = soals.length; if (t === 0) return;
         const l1 = soals.filter(x => x.lv === 'L1').length, l2 = soals.filter(x => x.lv === 'L2').length, l3 = soals.filter(x => x.lv === 'L3').length;
         document.getElementById('bar-l1').style.width = (l1/t*100) + "%"; document.getElementById('bar-l2').style.width = (l2/t*100) + "%"; document.getElementById('bar-l3').style.width = (l3/t*100) + "%";
         document.getElementById('bar-l1').innerText = l1 + " L1"; document.getElementById('bar-l2').innerText = l2 + " L2"; document.getElementById('bar-l3').innerText = l3 + " L3";
@@ -504,11 +464,14 @@
             document.getElementById('ob').value = d.ob; 
             document.getElementById('oc').value = d.oc; 
             document.getElementById('od').value = d.od;
+            
+            // Preview Gambar jika ada
             if(d.imgS) { document.getElementById('pS').src = d.imgS; document.getElementById('pS').classList.remove('hidden'); }
             if(d.imgOA) { document.getElementById('pOA').src = d.imgOA; document.getElementById('pOA').classList.remove('hidden'); }
             if(d.imgOB) { document.getElementById('pOB').src = d.imgOB; document.getElementById('pOB').classList.remove('hidden'); }
             if(d.imgOC) { document.getElementById('pOC').src = d.imgOC; document.getElementById('pOC').classList.remove('hidden'); }
             if(d.imgOD) { document.getElementById('pOD').src = d.imgOD; document.getElementById('pOD').classList.remove('hidden'); }
+            
             showTab('soal'); toggleForm(); 
         }); 
     }
@@ -521,7 +484,7 @@
     function toggleForm() { document.getElementById('panelPG').style.display = (document.getElementById('sBentuk').value === 'PG') ? 'block' : 'none'; }
     
     function resetSoal() { 
-        document.getElementById('fIdSoal').value="";
+        document.getElementById('fIdSoal').value=""; 
         document.getElementById('sTanya').value=""; 
         document.getElementById('oa').value=""; document.getElementById('ob').value=""; 
         document.getElementById('oc').value=""; document.getElementById('od').value="";
