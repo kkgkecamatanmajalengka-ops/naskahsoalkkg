@@ -42,6 +42,8 @@
 
         #printArea { background: white; width: 100%; max-width: 210mm; margin: 0 auto; color: black; }
         .page-section { padding: 0.5cm 0; min-height: 270mm; box-sizing: border-box; background: white; }
+        
+        /* Font Settings per Request */
         .font-arial { font-family: Arial, sans-serif !important; font-size: 12pt !important; line-height: 1.4; }
         .font-tnr { font-family: "Times New Roman", serif !important; font-size: 12pt !important; line-height: 1.4; }
         
@@ -52,6 +54,11 @@
         .kop img { position: absolute; left: 0; height: 80px; width: auto; }
         .kop-text { text-align: center; width: 100%; }
         .kop-text h3 { margin: 2px 0; line-height: 1.2; text-transform: uppercase; }
+
+        /* Penyejajaran Nomor Soal */
+        .soal-row { display: flex; margin-bottom: 15px; width: 100%; align-items: flex-start; }
+        .no-soal { width: 25px; flex-shrink: 0; font-weight: bold; }
+        .konten-soal { flex-grow: 1; }
 
         .opsi-container { width: 100%; margin-top: 5px; }
         .img-naskah { max-height: 150px; max-width: 100%; object-fit: contain; display: block; margin: 5px 0; }
@@ -279,7 +286,7 @@
 </div>
 
 <script>
-    // FIREBASE INITIALIZATION
+    // Konfigurasi Firebase Anda
     const firebaseConfig = {
         apiKey: "AIzaSyBA3VSLrRL6d9y0HdQM-H0Y7z2VisMHl_I",
         authDomain: "kkgmajalengka2026.firebaseapp.com",
@@ -292,7 +299,6 @@
     let cacheTP = [];
     let currentUser = { role: null, kls: null, label: "" };
 
-    // LOGO & LOGIN FUNCTIONS (Sama dengan kode awal)
     function updateLogo(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
@@ -362,6 +368,8 @@
         
         selMapel.innerHTML = opts.map(mapel => `<option value="${mapel}" ${mapel === m ? 'selected' : ''}>${mapel}</option>`).join('');
         document.getElementById('od-w').style.display = (k <= 2) ? "none" : "block";
+        
+        // Font logic per request
         document.getElementById('f-engine').className = "page-section " + (k <= 2 ? "font-arial" : "font-tnr");
 
         db.ref('kkg_tp').on('value', snap => {
@@ -382,14 +390,12 @@
         return (teks || "") + imgTag;
     }
 
-    // FUNGSI RENDER UTAMA DENGAN LOGIKA TATA LETAK BARU
     function renderAll(soals, kls) {
         const romawi = ["I", "II", "III", "IV", "V", "VI"];
         const teksKls = ["Satu", "Dua", "Tiga", "Empat", "Lima", "Enam"];
         document.getElementById('p-mapel-val').innerText = document.getElementById('selMapel').value;
         document.getElementById('p-kls-val').innerText = romawi[kls-1] + " (" + teksKls[kls-1] + ")";
 
-        // Render Kisi-kisi
         document.getElementById('p-kisi').innerHTML = soals.map((s, i) => {
             const dataTP = cacheTP.find(x => x.tp.trim() === s.tp.trim());
             return `<tr><td>${i+1}</td><td>${dataTP ? dataTP.e : "-"}</td><td>${s.tp}</td><td>${s.ind}</td><td>${s.lv}</td><td>${s.bentuk}</td></tr>`;
@@ -398,23 +404,25 @@
         const pg = soals.filter(x => x.bentuk === 'PG');
         const esai = soals.filter(x => x.bentuk === 'Esai');
 
-        // Render Naskah PG
         document.getElementById('p-naskah').innerHTML = pg.map((s, i) => {
             const hasImgOpsi = s.imgOA || s.imgOB || s.imgOC || s.imgOD;
-            const totalChar = (s.oa + s.ob + s.oc + (s.od || "")).length;
-            const isPendek = totalChar < 60 && !hasImgOpsi;
+            const isPendek = (s.oa + s.ob + s.oc + (s.od || "")).length < 60 && !hasImgOpsi;
 
             let opsiHTML = "";
             if (kls <= 2) {
-                // Kelas 1-2: Sejajar jika pendek, menurun jika panjang
+                // KELAS 1-2: Sejajar jika pendek, menurun jika panjang
                 opsiHTML = isPendek 
                     ? `<div style="display: flex; gap: 30px; margin-top: 5px;"><span>a. ${s.oa}</span><span>b. ${s.ob}</span><span>c. ${s.oc}</span></div>` 
-                    : `<div style="display: flex; flex-direction: column; gap: 5px; margin-top: 5px;"><div>a. ${renderOpsi(s.oa, s.imgOA)}</div><div>b. ${renderOpsi(s.ob, s.imgOB)}</div><div>c. ${renderOpsi(s.oc, s.imgOC)}</div></div>`;
+                    : `<div style="display: flex; flex-direction: column; gap: 5px; margin-top: 5px;">
+                        <div>a. ${renderOpsi(s.oa, s.imgOA)}</div>
+                        <div>b. ${renderOpsi(s.ob, s.imgOB)}</div>
+                        <div>c. ${renderOpsi(s.oc, s.imgOC)}</div>
+                       </div>`;
             } else {
-                // Kelas 3-6: 2 Kolom (2 kiri 2 kanan) jika pendek, menurun jika panjang
+                // KELAS 3-6: 2 Kolom (2 kiri 2 kanan) jika pendek, menurun jika panjang
                 if (isPendek) {
                     opsiHTML = `
-                        <table style="width: 100%; border: none; margin-top: 5px;">
+                        <table style="width: 100%; border: none; margin-top: 5px; border-collapse: collapse;">
                             <tr style="border: none;">
                                 <td style="border: none; width: 50%; padding: 2px 0;">a. ${s.oa}</td>
                                 <td style="border: none; width: 50%; padding: 2px 0;">b. ${s.ob}</td>
@@ -436,11 +444,11 @@
             }
 
             return `
-                <div class="soal-row" style="margin-bottom: 15px; display: flex;">
-                    <div style="width: 25px; flex-shrink: 0; font-weight:bold;">${i+1}.</div>
-                    <div style="flex-grow: 1;">
-                        <div style="text-align: justify;">
-                            ${s.imgS ? `<img src="${s.imgS}" class="img-naskah" style="display: block; margin-bottom: 10px;">` : ''} 
+                <div class="soal-row">
+                    <div class="no-soal">${i+1}.</div>
+                    <div class="konten-soal">
+                        <div>
+                            ${s.imgS ? `<img src="${s.imgS}" class="img-naskah">` : ''} 
                             ${s.tanya}
                         </div>
                         <div class="opsi-container">${opsiHTML}</div>
@@ -448,30 +456,47 @@
                 </div>`;
         }).join('');
 
-        // Render Esai & Kunci
-        document.getElementById('p-naskah-esai').innerHTML = esai.map((s, i) => `<div class="soal-row" style="display:flex; margin-bottom:15px;"><div style="width:25px; font-weight:bold;">${pg.length+i+1}.</div><div style="text-align:justify;">${s.tanya}</div></div>`).join('');
-        document.getElementById('p-kunci').innerHTML = soals.map((s, i) => `<tr><td style="text-align:center;">${i+1}</td><td style="text-align:center; text-transform:uppercase;">${s.kunci}</td><td style="text-align:center;">${s.skor}</td></tr>`).join('');
-        
-        // List Editor
-        document.getElementById('listSoal').innerHTML = soals.map(s => `<div class="card" style="display:flex; justify-content:space-between; align-items:center;"><div><b>[${s.lv}]</b> ${s.tanya.substring(0,60)}...</div><div><button class="btn-sm btn-blue" onclick="editSoal('${s.id}')">Edit</button><button class="btn-sm btn-red" onclick="if(confirm('Hapus?')) db.ref('kkg_soal/${s.id}').remove()">X</button></div></div>`).join('');
+        document.getElementById('p-naskah-esai').innerHTML = esai.map((s, i) => 
+            `<div class="soal-row">
+                <div class="no-soal">${pg.length + i + 1}.</div>
+                <div class="konten-soal">${s.tanya}</div>
+            </div>`
+        ).join('');
+
+        document.getElementById('p-kunci').innerHTML = soals.map((s, i) => 
+            `<tr><td style="text-align:center;">${i+1}</td><td style="text-align:center; text-transform: uppercase;">${s.kunci}</td><td style="text-align:center;">${s.skor}</td></tr>`
+        ).join('');
+
+        document.getElementById('listSoal').innerHTML = soals.map(s => 
+            `<div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+                <div><b>[${s.lv}]</b> ${s.tanya.substring(0,60)}...</div>
+                <div>
+                    <button class="btn-sm btn-blue" onclick="editSoal('${s.id}')">Edit</button>
+                    <button class="btn-sm btn-red" onclick="if(confirm('Hapus soal?')) db.ref('kkg_soal/${s.id}').remove()">X</button>
+                </div>
+            </div>`
+        ).join('');
     }
 
-    // FUNGSI DOWNLOAD WORD (.doc)
     function downloadWord() {
-        const konten = document.getElementById('printArea').innerHTML;
-        const mapel = document.getElementById('selMapel').value;
         const kls = document.getElementById('selKls').value;
-        const fontStyle = (kls <= 2) ? "font-family: Arial, sans-serif;" : "font-family: 'Times New Roman', serif;";
+        const mapel = document.getElementById('selMapel').value;
+        const fontName = (kls <= 2) ? "Arial" : "Times New Roman";
+        const konten = document.getElementById('printArea').innerHTML;
 
         const htmlHeader = `
             <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
             <head><meta charset='utf-8'>
                 <style>
-                    body { ${fontStyle} font-size: 11pt; }
+                    body { font-family: '${fontName}'; font-size: 12pt; }
                     table { border-collapse: collapse; width: 100%; }
                     th, td { border: 1px solid black; padding: 5px; }
-                    .kop { text-align: center; border-bottom: 4px double black; }
-                    .no-print { display: none !important; }
+                    .soal-row { display: block; margin-bottom: 15px; }
+                    .no-soal { width: 30px; float: left; font-weight: bold; }
+                    .konten-soal { margin-left: 35px; }
+                    .opsi-container { margin-top: 5px; clear: both; }
+                    .kop { text-align: center; border-bottom: 4px double black; margin-bottom: 20px; }
+                    .no-print { display: none; }
                 </style>
             </head><body>`;
         const htmlFooter = "</body></html>";
@@ -480,12 +505,12 @@
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `Soal_STS2_${mapel}_Kls${kls}_2026.doc`;
+        link.download = `Soal_STS2_${mapel}_Kls${kls}.doc`;
         link.click();
         URL.revokeObjectURL(url);
     }
 
-    // CRUD & DATABASE FUNCTIONS (Tetap sesuai kode awal)
+    // Fungsi Database Lainnya (CRUD)
     function updateStats(soals) {
         const t = soals.length; if (t === 0) return;
         const l1 = soals.filter(x => x.lv === 'L1').length, l2 = soals.filter(x => x.lv === 'L2').length, l3 = soals.filter(x => x.lv === 'L3').length;
@@ -536,4 +561,3 @@
 </script>
 </body>
 </html>
-
