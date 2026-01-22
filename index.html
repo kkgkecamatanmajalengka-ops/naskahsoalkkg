@@ -203,8 +203,9 @@
     </div>
 
     <div id="tab-cetak" class="tab-content hidden">
-        <div class="no-print card" style="text-align:center;">
+        <div class="no-print card" style="text-align:center; display: flex; justify-content: center; gap: 10px;">
             <button class="btn btn-blue" onclick="window.print()">MULAI CETAK DOKUMEN</button>
+            <button class="btn btn-green" style="background-color: #2b5797;" onclick="downloadWord()">DOWNLOAD WORD (.doc)</button>
         </div>
         
         <div id="printArea" class="print-only">
@@ -356,7 +357,6 @@
             opts = ["Bahasa Inggris"]; 
         } 
         else if(currentUser.role === 'admin') {
-            // PERBAIKAN: Admin mendapatkan akses semua mata pelajaran termasuk PAI dan Inggris
             opts = ["PAI", ...mapelDasar, "Bahasa Inggris"];
             if(parseInt(k) >= 3) opts.push("IPAS");
         }
@@ -465,7 +465,6 @@
             document.getElementById('oc').value = d.oc; 
             document.getElementById('od').value = d.od;
             
-            // Preview Gambar jika ada
             if(d.imgS) { document.getElementById('pS').src = d.imgS; document.getElementById('pS').classList.remove('hidden'); }
             if(d.imgOA) { document.getElementById('pOA').src = d.imgOA; document.getElementById('pOA').classList.remove('hidden'); }
             if(d.imgOB) { document.getElementById('pOB').src = d.imgOB; document.getElementById('pOB').classList.remove('hidden'); }
@@ -474,6 +473,44 @@
             
             showTab('soal'); toggleForm(); 
         }); 
+    }
+
+    function downloadWord() {
+        const konten = document.getElementById('printArea').innerHTML;
+        const mapel = document.getElementById('selMapel').value;
+        const kls = document.getElementById('selKls').value;
+        const fontStyle = (kls <= 2) ? "font-family: Arial, sans-serif;" : "font-family: 'Times New Roman', serif;";
+
+        const htmlHeader = `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head>
+                <meta charset='utf-8'>
+                <style>
+                    body { ${fontStyle} font-size: 11pt; line-height: 1.4; color: black; }
+                    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+                    th, td { border: 1px solid black; padding: 5px; text-align: left; vertical-align: top; }
+                    .kop { text-align: center; border-bottom: 4px double black; padding-bottom: 10px; margin-bottom: 20px; }
+                    .kop img { height: 80px; float: left; }
+                    .kop-text { text-align: center; }
+                    .soal-row { display: flex; margin-bottom: 15px; }
+                    .img-naskah { max-width: 300px; height: auto; display: block; margin: 5px 0; }
+                    .img-opsi-naskah { max-height: 80px; display: block; }
+                    .grid-2-col { display: table; width: 100%; }
+                    .grid-2-col > div { display: table-cell; width: 50%; padding-bottom: 5px; }
+                    .no-print { display: none !important; }
+                </style>
+            </head>
+            <body>
+        `;
+        const htmlFooter = "</body></html>";
+        
+        const blob = new Blob(['\ufeff', htmlHeader + konten + htmlFooter], { type: 'application/msword' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Soal_STS2_${mapel}_Kls${kls}_2026.doc`;
+        link.click();
+        URL.revokeObjectURL(url);
     }
 
     function exportData() { db.ref().once('value', s => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(s.val())], {type:'application/json'})); a.download = 'backup_kkg.json'; a.click(); }); }
