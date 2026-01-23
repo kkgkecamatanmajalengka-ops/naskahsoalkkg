@@ -370,14 +370,74 @@
     function importData(f) { if(f){ const r=new FileReader(); r.onload=e=>db.ref().set(JSON.parse(e.target.result)).then(()=>location.reload()); r.readAsText(f); } }
     
     function downloadWord() {
-        const k = document.getElementById('selKls').value;
-        const html = `<html><head><meta charset='utf-8'><style>body{font-family:'${k<=2?'Arial':'Times New Roman'}';} table{border-collapse:collapse;width:100%;} td{border:1px solid black; padding:5px;}</style></head><body>${document.getElementById('printArea').innerHTML}</body></html>`;
-        const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `Soal_Kls_${k}.doc`;
-        link.click();
+    const logo = document.getElementById('p-logo').src;
+    const mapel = document.getElementById('selMapel').value;
+    const kls = document.getElementById('selKls').value;
+
+    // Ambil HANYA isi naskah cetak (sesuai kode lama kamu)
+    const konten = document.getElementById('printArea').innerHTML;
+
+    const fontUtama = (kls <= 2)
+        ? "Arial, sans-serif"
+        : "'Times New Roman', serif";
+
+    const htmlHeader = `
+<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<style>
+    body {
+        font-family: ${fontUtama};
+        font-size: 11pt;
+        line-height: 1.4;
+        color: black;
     }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    th, td {
+        border: 1px solid black;
+        padding: 5px;
+    }
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+    .kop {
+        border-bottom: 4px double black;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+    }
+    .no-print {
+        display: none !important;
+    }
+</style>
+</head>
+<body>
+`;
+
+    const htmlFooter = `
+</body>
+</html>
+`;
+
+    const blob = new Blob(
+        ['\ufeff', htmlHeader + konten + htmlFooter],
+        { type: 'application/msword' }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Soal_STS2_${mapel}_Kelas_${kls}_2026.doc`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
 
     // Auto-load logo
     window.onload = () => { const l=localStorage.getItem('kkg_logo'); if(l){ document.getElementById('p-logo').src=l; document.getElementById('logo-preview').src=l; } };
@@ -385,3 +445,4 @@
 </script>
 </body>
 </html>
+
