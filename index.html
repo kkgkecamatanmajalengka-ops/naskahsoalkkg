@@ -392,26 +392,31 @@
     body {
         font-family: ${fontUtama};
         font-size: 11pt;
-        line-height: 1.4;
+        line-height: 1.5;
         color: black;
     }
+
     table {
         border-collapse: collapse;
         width: 100%;
     }
-    th, td {
-        border: 1px solid black;
-        padding: 5px;
+
+    /* HILANGKAN GARIS TABEL */
+    table, tr, td, th {
+        border: none !important;
     }
+
+    /* NOMOR SOAL RATA ATAS */
+    td {
+        vertical-align: top !important;
+        padding: 2px 0;
+    }
+
     img {
         max-width: 100%;
         height: auto;
     }
-    .kop {
-        border-bottom: 4px double black;
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-    }
+
     .no-print {
         display: none !important;
     }
@@ -445,5 +450,6 @@
 </script>
 </body>
 </html>
+
 
 
