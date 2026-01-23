@@ -370,167 +370,80 @@
     function importData(f) { if(f){ const r=new FileReader(); r.onload=e=>db.ref().set(JSON.parse(e.target.result)).then(()=>location.reload()); r.readAsText(f); } }
     
     function downloadWord() {
-    const logo = document.getElementById('p-logo').src;
     const mapel = document.getElementById('selMapel').value;
     const kls = document.getElementById('selKls').value;
 
-    // Ambil HANYA isi naskah cetak (sesuai kode lama kamu)
-    // ==== PAKSA OPSI MENURUN JIKA ADA YANG PANJANG ====
-document.querySelectorAll('.table-opsi').forEach(table => {
-    let perluMenurun = false;
+    // 1. Ambil salinan area cetak agar tidak merusak tampilan di browser
+    const contentElement = document.getElementById('f-engine').cloneNode(true);
 
-    table.querySelectorAll('td').forEach(td => {
-        if (td.innerText.trim().length > 45) {
-    perluMenurun = true;
-}
-    });
+    // 2. LOGIKA OPSI: Tetap jalankan pengecekan panjang teks untuk Word
+    contentElement.querySelectorAll('.table-opsi').forEach(table => {
+        let perluMenurun = false;
+        table.querySelectorAll('td').forEach(td => {
+            if (td.innerText.trim().length > 45) { perluMenurun = true; }
+        });
 
-    if (perluMenurun) {
         if (perluMenurun) {
-    const opsi = [];
-    table.querySelectorAll('td').forEach(td => {
-        opsi.push(td.innerHTML);
+            const opsi = [];
+            table.querySelectorAll('td').forEach(td => { opsi.push(td.innerHTML); });
+            table.innerHTML = opsi.map(o => `<tr><td colspan="2" style="width:100%">${o}</td></tr>`).join('');
+        }
     });
 
-    table.innerHTML = opsi.map(o => `
-        <tr>
-            <td colspan="2" style="width:100%">${o}</td>
-        </tr>
-    `).join('');
-}
+    // 3. LOGIKA GAMBAR: Pastikan gambar memiliki ukuran fisik agar muncul di Word
+    const allImages = contentElement.getElementsByTagName('img');
+    for (let img of allImages) {
+        if (img.src && img.src.startsWith('data:image')) {
+            // Jika ini logo di kop
+            if (img.id === 'p-logo') {
+                img.width = 75; 
+                img.height = 75;
+            } else if (img.classList.contains('img-naskah')) {
+                img.width = 300; // Ukuran gambar soal
+            } else if (img.classList.contains('img-opsi-naskah')) {
+                img.width = 100; // Ukuran gambar di pilihan jawaban
+            }
+        } else {
+            img.remove(); // Hapus elemen img jika tidak ada gambarnya
+        }
     }
-});
-        const konten = document.getElementById('f-engine').innerHTML;
 
-    const fontUtama = (kls <= 2)
-        ? "Arial, sans-serif"
-        : "'Times New Roman', serif";
+    const konten = contentElement.innerHTML;
+    const fontUtama = (kls <= 2) ? "Arial" : "Times New Roman";
 
+    // 4. Bungkus dengan Header HTML khusus Microsoft Word
     const htmlHeader = `
-<!DOCTYPE html>
-<html xmlns:o="urn:schemas-microsoft-com:office:office"
-      xmlns:w="urn:schemas-microsoft-com:office:word"
-      xmlns="http://www.w3.org/TR/REC-html40">
-<head>
-<meta charset="utf-8">
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'>
 <style>
-/* ===== OPSI PILIHAN GANDA (2 KIRI – 2 KANAN CERDAS) ===== */
-/* ===== OPSI PILIHAN GANDA CERDAS (2 KIRI – 2 KANAN) ===== */
-/* ===== OPSI PILIHAN GANDA (2 KIRI – 2 KANAN CERDAS) ===== */
-/* ==== KOP WORD (RAPI & TIDAK TERLALU LEBAR) ==== */
-/* ==== KOP WORD (RAPI & TIDAK TERLALU LEBAR) ==== */
-.kop-table {
-    width: 100%;
-    max-width: 650px;   /* KUNCI LEBAR KOP */
-    margin: 0 auto 10px auto;
-    border-collapse: collapse;
-}
-
-.kop-table td {
-    padding: 4px 6px;
-    vertical-align: middle;
-}
-
-.kop-table img {
-    height: 70px;
-    width: auto;
-}
-
-.kop-text-center h3 {
-    margin: 0;
-    line-height: 1.2;
-    font-size: 13pt;
-}
-
-.kop td {
-    padding: 4px 6px;
-    vertical-align: middle;
-}
-
-.kop img {
-    width: 70px;
-    height: auto;
-}
-
-.kop .judul {
-    font-size: 14pt;
-    font-weight: bold;
-    line-height: 1.2;
-}
-
-.kop .subjudul {
-    font-size: 11pt;
-    line-height: 1.2;
-}
-
-.table-opsi td {
-    width: 50%;
-    vertical-align: top;      /* teks & angka nempel ke atas */
-    word-wrap: break-word;    /* teks panjang turun baris */
-    white-space: normal;
-    padding-right: 10px;
-}
-body {
-        font-family: ${fontUtama};
-        font-size: 11pt;
-        line-height: 1.5;
-        color: black;
-    }
-
-    table {
-        border-collapse: collapse;
-        width: 100%;
-    }
-
-    /* HILANGKAN GARIS TABEL */
-    table, tr, td, th {
-        border: none !important;
-    }
-
-    /* NOMOR SOAL RATA ATAS */
-    td {
-        vertical-align: top !important;
-        padding: 2px 0;
-    }
-
-    img {
-        max-width: 100%;
-        height: auto;
-    }
-
-    .no-print {
-        display: none !important;
-    }
+    body { font-family: '${fontUtama}'; font-size: 11pt; }
+    table { width: 100%; border-collapse: collapse; }
+    td { vertical-align: top; padding: 2px; }
+    .kop-table { border-bottom: 3pt double black; margin-bottom: 10px; }
+    .kop-text-center { text-align: center; }
+    .table-opsi td { width: 50%; }
+    img { display: block; margin: 5px 0; }
 </style>
-</head>
-<body>
-`;
+</head><body>`;
 
-    const htmlFooter = `
-</body>
-</html>
-`;
+    const htmlFooter = "</body></html>";
 
-    const blob = new Blob(
-        ['\ufeff', htmlHeader + konten + htmlFooter],
-        { type: 'application/msword' }
-    );
-
+    // 5. Eksekusi Download
+    const blob = new Blob(['\ufeff', htmlHeader + konten + htmlFooter], { type: 'application/msword' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Soal_STS2_${mapel}_Kelas_${kls}_2026.doc`;
+    a.download = `Soal_STS2_${mapel}_Kls${kls}_2026.doc`;
     a.click();
     URL.revokeObjectURL(url);
 }
-
-
     // Auto-load logo
     window.onload = () => { const l=localStorage.getItem('kkg_logo'); if(l){ document.getElementById('p-logo').src=l; document.getElementById('logo-preview').src=l; } };
     db.ref(".info/connected").on("value", s => { document.getElementById('db-st').innerText = s.val() ? "● ONLINE" : "○ OFFLINE"; document.getElementById('db-st').style.color = s.val() ? "#10b981" : "#ef4444"; });
 </script>
 </body>
 </html>
+
 
 
 
