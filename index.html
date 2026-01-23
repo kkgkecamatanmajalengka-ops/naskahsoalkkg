@@ -375,7 +375,28 @@
     const kls = document.getElementById('selKls').value;
 
     // Ambil HANYA isi naskah cetak (sesuai kode lama kamu)
-    const konten = document.getElementById('f-engine').innerHTML;
+    // ==== PAKSA OPSI MENURUN JIKA ADA YANG PANJANG ====
+document.querySelectorAll('.table-opsi').forEach(table => {
+    let perluMenurun = false;
+
+    table.querySelectorAll('td').forEach(td => {
+        if (td.innerText.length > 80) { // ambang panjang
+            perluMenurun = true;
+        }
+    });
+
+    if (perluMenurun) {
+        const rows = table.querySelectorAll('tr');
+        rows.forEach(row => {
+            row.querySelectorAll('td').forEach(td => {
+                td.colSpan = 2;
+                td.style.display = 'block';
+                td.style.width = '100%';
+            });
+        });
+    }
+});
+        const konten = document.getElementById('f-engine').innerHTML;
 
     const fontUtama = (kls <= 2)
         ? "Arial, sans-serif"
@@ -465,6 +486,7 @@ body {
 </script>
 </body>
 </html>
+
 
 
 
