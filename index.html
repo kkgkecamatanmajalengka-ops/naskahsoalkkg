@@ -373,6 +373,23 @@
     const logo = document.getElementById('p-logo').src;
     const mapel = document.getElementById('selMapel').value;
     const kls = document.getElementById('selKls').value;
+        const kopWord = `
+<div class="kop">
+<table>
+<tr>
+<td style="width:80px; text-align:center;">
+<img src="${logo}">
+</td>
+<td style="text-align:center;">
+<div class="judul">SUMATIF TENGAH SEMESTER (STS)</div>
+<div class="judul">SEMESTER 2 SEKOLAH DASAR</div>
+<div class="subjudul">TAHUN AJARAN 2025/2026</div>
+</td>
+<td style="width:80px;"></td>
+</tr>
+</table>
+</div>
+`;
 
     // Ambil HANYA isi naskah cetak (sesuai kode lama kamu)
     // ==== PAKSA OPSI MENURUN JIKA ADA YANG PANJANG ====
@@ -400,7 +417,7 @@ document.querySelectorAll('.table-opsi').forEach(table => {
 }
     }
 });
-        const konten = document.getElementById('f-engine').innerHTML;
+        const konten = kopWord + document.getElementById('f-engine').innerHTML;
 
     const fontUtama = (kls <= 2)
         ? "Arial, sans-serif"
@@ -519,3 +536,4 @@ body {
 </script>
 </body>
 </html>
+
