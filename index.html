@@ -1,30 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
-<title>KKG STS FIX MERGED</title>
-<style>
-body{font-family:Arial,sans-serif}
-.login-box{max-width:300px;margin:40px auto}
-button{padding:6px 12px}
-#app{display:none}
-</style>
-</head>
-<body>
-
-<div class="login-box" id="loginBox">
-  <h3>Login</h3>
-  <input id="user" placeholder="user"><br><br>
-  <input id="pass" type="password" placeholder="password"><br><br>
-  <button onclick="login()">Login</button>
-</div>
-
-<div id="app">
-  <h3>Aplikasi</h3>
-  <!-- konten lama -->
-<!DOCTYPE html>
-<html lang="id">
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aplikasi KKG 2026 - STS Semester 2</title>
@@ -402,7 +378,32 @@ button{padding:6px 12px}
 <table>
 <tr>
 <td style="width:80px; text-align:center;">
-<img src="${logo}">
+const kopWord = `
+<div class="kop">
+<table>
+<tr>
+<td style="width:80px; text-align:center;">
+<!--[if gte vml 1]>
+<v:shape style="width:70pt;height:70pt" type="#_x0000_t75">
+<v:imagedata src="${logo}" />
+</v:shape>
+<![endif]-->
+<!--[if !vml]>
+<img src="${logo}" width="70" />
+<![endif]-->
+</td>
+
+<td style="text-align:center;">
+<div class="judul">SUMATIF TENGAH SEMESTER (STS)</div>
+<div class="judul">SEMESTER 2 SEKOLAH DASAR</div>
+<div class="subjudul">TAHUN AJARAN 2025/2026</div>
+</td>
+
+<td style="width:80px;"></td>
+</tr>
+</table>
+</div>
+`;
 </td>
 <td style="text-align:center;">
 <div class="judul">SUMATIF TENGAH SEMESTER (STS)</div>
@@ -441,7 +442,9 @@ document.querySelectorAll('.table-opsi').forEach(table => {
 }
     }
 });
-        const konten = kopWord + document.getElementById('f-engine').innerHTML;
+        const engine = document.getElementById('f-engine').cloneNode(true);
+engine.querySelector('.kop-table')?.remove(); // HAPUS KOP HTML
+const konten = kopWord + engine.innerHTML;
 
     const fontUtama = (kls <= 2)
         ? "Arial, sans-serif"
@@ -562,18 +565,3 @@ body {
 </html>
 
 
-</div>
-
-<script>
-function login(){
-  if(document.getElementById('user').value){
-    document.getElementById('loginBox').style.display='none';
-    document.getElementById('app').style.display='block';
-  }else{
-    alert('isi user');
-  }
-}
-</script>
-
-</body>
-</html>
