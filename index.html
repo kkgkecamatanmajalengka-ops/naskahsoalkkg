@@ -22,57 +22,45 @@
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
         .btn { padding: 10px 15px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; color: white; transition: 0.3s; }
         .btn-blue { background: var(--a); } .btn-green { background: var(--s); } .btn-red { background: var(--d); }
-        .btn-sm { padding: 5px 10px; font-size: 12px; margin-right: 5px; }
-        .img-pre { max-height: 80px; display: block; margin: 5px 0; border: 1px solid #ddd; }
-        .hidden { display: none; }
-
+        
         #login-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f1f5f9; z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .login-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 350px; }
 
-        /* PRINT STYLES */
         @media print {
             @page { size: A4; margin: 1.5cm; }
             body { background: white !important; }
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            .page-section { page-break-after: always; }
         }
 
-        #printArea { background: white; width: 100%; color: black; line-height: 1.1; }
+        #printArea { background: white; width: 100%; max-width: 210mm; margin: 0 auto; color: black; line-height: 1.0; }
         .font-arial { font-family: Arial, sans-serif !important; font-size: 12pt !important; }
         .font-tnr { font-family: "Times New Roman", serif !important; font-size: 12pt !important; }
         
-        /* KOP SURAT LOGO KIRI */
-        .kop { display: table; width: 100%; border-bottom: 3px double black; padding-bottom: 5px; margin-bottom: 10px; }
-        .kop-logo { display: table-cell; width: 85px; vertical-align: middle; }
-        .kop-logo img { width: 75px; height: auto; }
-        .kop-text { display: table-cell; text-align: center; vertical-align: middle; }
-        .kop-text h3 { margin: 0; padding: 0; line-height: 1.1; text-transform: uppercase; font-size: 13pt; }
+        /* Layout KOP Baru */
+        .kop-table { width: 100%; border-collapse: collapse; border-bottom: 4px double black; margin-bottom: 10px; }
+        .kop-table td { border: none !important; padding: 0; vertical-align: middle; }
+        .kop-text { text-align: center; }
+        .kop-text h3 { margin: 0; padding: 2px 0; line-height: 1.1; text-transform: uppercase; }
 
-        /* IDENTITAS PESERTA */
-        .table-identitas { width: 100%; border: none; margin-bottom: 10px; font-weight: bold; }
-        .table-identitas td { border: none; padding: 2px; font-size: 11pt; }
-
-        /* SOAL - NOMOR SEJAJAR PERTANYAAN */
-        .soal-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; table-layout: fixed; }
-        .soal-table td { border: none; padding: 0; vertical-align: top; line-height: 1.1; }
-        .no-col { width: 25px; font-weight: bold; text-align: left; }
-
-        /* OPSI JAWABAN */
-        .opsi-container { width: 100%; border-collapse: collapse; margin-top: 3px; }
-        .opsi-container td { border: none; padding: 1px 0; vertical-align: top; }
+        .soal-row { display: flex; margin-bottom: 10px; align-items: flex-start; line-height: 1.0; }
+        .no-soal { width: 25px; flex-shrink: 0; font-weight: bold; }
+        .konten-soal { flex-grow: 1; }
         
-        img.img-naskah { max-width: 250px; display: block; margin: 5px 0; }
-        img.img-opsi { max-height: 70px; display: block; margin-top: 2px; }
+        .opsi-table { width: 100%; border-collapse: collapse; border: none; margin-top: 5px; }
+        .opsi-table td { border: none !important; padding: 2px 0; vertical-align: top; }
+
+        .img-naskah { max-height: 150px; display: block; margin: 5px 0; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <div id="login-page">
     <div class="login-card">
-        <h2 style="text-align:center; margin-bottom:20px;">LOGIN KKG 2026</h2>
-        <input type="text" id="lUser" placeholder="Username" style="margin-bottom:10px;">
-        <input type="password" id="lPass" placeholder="Password" style="margin-bottom:20px;">
+        <h2 style="text-align:center;">LOGIN KKG 2026</h2>
+        <input type="text" id="lUser" placeholder="Username (admin/guru1/pai)" style="margin-bottom:10px;">
+        <input type="password" id="lPass" placeholder="Password" style="margin-bottom:15px;">
         <button class="btn btn-blue" style="width:100%;" id="btnLogin">MASUK</button>
     </div>
 </div>
@@ -84,7 +72,7 @@
 
 <div class="nav no-print">
     <button class="nav-btn active" onclick="showTab('tp')">A. TP</button>
-    <button class="nav-btn" onclick="showTab('soal')">B. SOAL</button>
+    <button class="nav-btn" onclick="showTab('soal')">B. BUAT SOAL</button>
     <button class="nav-btn" onclick="showTab('cetak')">C. CETAK</button>
     <button class="nav-btn" onclick="location.reload()" style="color:var(--d)">LOGOUT</button>
 </div>
@@ -92,71 +80,76 @@
 <div class="container">
     <div class="card no-print">
         <div class="grid">
-            <div><label>Kelas</label><select id="selKls" onchange="initData()"></select></div>
-            <div><label>Mapel</label><select id="selMapel" onchange="initData()"></select></div>
+            <div><label>Fokus Kelas</label><select id="selKls" onchange="initData()"><option value="1">Kelas I</option><option value="2">Kelas II</option><option value="3">Kelas III</option><option value="4">Kelas IV</option><option value="5">Kelas V</option><option value="6">Kelas VI</option></select></div>
+            <div><label>Mata Pelajaran</label><select id="selMapel" onchange="initData()"></select></div>
         </div>
     </div>
 
     <div id="tab-tp" class="tab-content no-print">
         <div class="card">
-            <label>Logo Sekolah</label>
-            <input type="file" accept="image/*" onchange="updateLogo(this)">
-            <img id="logo-preview" style="height:60px; margin-top:10px;">
-        </div>
-        <div class="card">
-            <h4>Input TP</h4>
-            <input type="text" id="fElemen" placeholder="Elemen">
-            <textarea id="fTp" placeholder="Tujuan Pembelajaran" rows="2" style="margin-top:10px;"></textarea>
+            <label>Upload Logo Sekolah</label>
+            <input type="file" onchange="updateLogo(this)">
+            <div class="grid" style="margin-top:15px;">
+                <input type="text" id="fElemen" placeholder="Elemen">
+                <textarea id="fTp" placeholder="Tujuan Pembelajaran"></textarea>
+            </div>
             <button class="btn btn-blue" style="margin-top:10px;" onclick="saveTP()">SIMPAN TP</button>
-            <table style="width:100%; margin-top:20px; border-collapse: collapse;">
-                <thead style="background:#f1f5f9;"><tr><th style="border:1px solid #ddd; padding:8px;">Elemen</th><th style="border:1px solid #ddd; padding:8px;">TP</th><th style="border:1px solid #ddd; padding:8px;">Aksi</th></tr></thead>
-                <tbody id="bodyTP"></tbody>
-            </table>
         </div>
+        <div class="card"><table><tbody id="bodyTP"></tbody></table></div>
     </div>
 
     <div id="tab-soal" class="tab-content hidden no-print">
         <div class="card">
-            <select id="sTP"></select>
-            <input type="text" id="sInd" placeholder="Indikator" style="margin-top:10px;">
-            <select id="sLv" style="margin-top:10px;"><option value="L1">L1</option><option value="L2">L2</option><option value="L3">L3</option></select>
-            <select id="sBentuk" onchange="toggleForm()" style="margin-top:10px;"><option value="PG">Pilihan Ganda</option><option value="Esai">Esai</option></select>
-            <textarea id="sTanya" placeholder="Pertanyaan" rows="3" style="margin-top:10px;"></textarea>
-            <input type="file" onchange="preImg(this,'pS')"><img id="pS" class="img-pre hidden">
-            
-            <div id="panelPG" style="margin-top:10px;">
-                <input type="text" id="oa" placeholder="Opsi A"><input type="text" id="ob" placeholder="Opsi B">
-                <input type="text" id="oc" placeholder="Opsi C"><input type="text" id="od" placeholder="Opsi D (Kelas 1-2 Kosongkan)">
+            <select id="sTP" style="margin-bottom:10px;"></select>
+            <div class="grid">
+                <select id="sLv"><option value="L1">L1</option><option value="L2">L2</option><option value="L3">L3</option></select>
+                <select id="sBentuk" onchange="toggleForm()"><option value="PG">PG</option><option value="Esai">Esai</option></select>
             </div>
-            <input type="text" id="sKunci" placeholder="Kunci" style="margin-top:10px;">
-            <button class="btn btn-green" style="width:100%; margin-top:20px;" onclick="saveSoal()">SIMPAN SOAL</button>
+            <textarea id="sTanya" placeholder="Stimulus & Pertanyaan" style="margin-top:10px;"></textarea>
+            <div id="panelPG" style="margin-top:10px;">
+                <div class="grid">
+                    <input type="text" id="oa" placeholder="Opsi A">
+                    <input type="text" id="ob" placeholder="Opsi B">
+                    <input type="text" id="oc" placeholder="Opsi C">
+                    <input type="text" id="od" placeholder="Opsi D">
+                </div>
+            </div>
+            <div class="grid" style="margin-top:10px;">
+                <input type="text" id="sKunci" placeholder="Kunci">
+                <input type="number" id="sSkor" value="1">
+            </div>
+            <button class="btn btn-green" style="width:100%; margin-top:15px;" onclick="saveSoal()">SIMPAN SOAL</button>
         </div>
         <div id="listSoal"></div>
     </div>
 
     <div id="tab-cetak" class="tab-content hidden">
         <div class="no-print card" style="text-align:center;">
-            <button class="btn btn-blue" onclick="window.print()">PRINT PDF</button>
-            <button class="btn btn-green" onclick="downloadWord()">DOWNLOAD WORD</button>
+            <button class="btn btn-blue" onclick="window.print()">CETAK PDF</button>
+            <button class="btn btn-green" onclick="downloadWord()">DOWNLOAD WORD (.doc)</button>
         </div>
         
-        <div id="printArea" class="print-only">
-            <div class="page-section" id="f-engine">
-                <div class="kop">
-                    <div class="kop-logo"><img id="p-logo" src="https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png"></div>
-                    <div class="kop-text">
-                        <h3>SUMATIF TENGAH SEMESTER (STS)</h3>
-                        <h3>SEMESTER 2 SEKOLAH DASAR</h3>
-                        <h3 style="font-size: 11pt;">TAHUN AJARAN 2025/2026</h3>
-                    </div>
-                </div>
-
-                <table class="table-identitas">
-                    <tr><td style="width:20%;">Mata Pelajaran</td><td>: <span id="p-mapel-val"></span></td><td style="width:10%;">Nama</td><td>: ...........................</td></tr>
-                    <tr><td>Kelas</td><td>: <span id="p-kls-val"></span></td><td>Nomor</td><td>: ...........................</td></tr>
+        <div id="printArea">
+            <div id="f-engine">
+                <table class="kop-table">
+                    <tr>
+                        <td style="width: 12%; text-align: left;">
+                            <img id="p-logo" src="https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png" style="height: 70px; width: auto;">
+                        </td>
+                        <td class="kop-text">
+                            <h3>SUMATIF TENGAH SEMESTER (STS)</h3>
+                            <h3>SEMESTER 2 SEKOLAH DASAR</h3>
+                            <h3 id="p-ta">TAHUN AJARAN 2025/2026</h3>
+                        </td>
+                    </tr>
                 </table>
 
-                <div style="border-top:1px solid black; border-bottom:1px solid black; padding:3px 0; font-weight:bold; margin-bottom:10px;">
+                <table style="width:100%; border:none; margin-bottom:10px; font-weight:bold;">
+                    <tr style="border:none;"><td style="border:none; width:15%;">Mapel</td><td style="border:none;">: <span id="p-mapel-val"></span></td><td style="border:none; width:15%;">Nama</td><td style="border:none;">: ....................</td></tr>
+                    <tr style="border:none;"><td style="border:none;">Kelas</td><td style="border:none;">: <span id="p-kls-val"></span></td><td style="border:none;">Nomor</td><td style="border:none;">: ....................</td></tr>
+                </table>
+
+                <div style="border-top:1px solid black; border-bottom:1px solid black; padding:3px 0; font-weight:bold; margin-bottom:15px;">
                     Berilah tanda silang (X) pada huruf a, b, c atau d untuk jawaban yang paling benar!
                 </div>
                 <div id="p-naskah"></div>
@@ -168,113 +161,114 @@
 </div>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyBA3VSLrRL6d9y0HdQM-H0Y7z2VisMHl_I",
-        authDomain: "kkgmajalengka2026.firebaseapp.com",
-        databaseURL: "https://kkgmajalengka2026-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "kkgmajalengka2026",
-    };
+    const firebaseConfig = { apiKey: "AIzaSyBA3VSLrRL6d9y0HdQM-H0Y7z2VisMHl_I", authDomain: "kkgmajalengka2026.firebaseapp.com", databaseURL: "https://kkgmajalengka2026-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "kkgmajalengka2026" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     
     let cacheTP = [];
-
-    function updateLogo(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                document.getElementById('p-logo').src = e.target.result;
-                document.getElementById('logo-preview').src = e.target.result;
-                localStorage.setItem('kkg_logo_2026', e.target.result);
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
-    window.onload = () => {
-        const logo = localStorage.getItem('kkg_logo_2026');
-        if(logo) { document.getElementById('p-logo').src = logo; document.getElementById('logo-preview').src = logo; }
-        document.getElementById('selKls').innerHTML = [1,2,3,4,5,6].map(v => `<option value="${v}">Kelas ${v}</option>`).join('');
-    };
-
+    function updateLogo(input) { if (input.files[0]) { const reader = new FileReader(); reader.onload = e => { document.getElementById('p-logo').src = e.target.result; localStorage.setItem('kkg_logo', e.target.result); }; reader.readAsDataURL(input.files[0]); } }
+    
     function doLogin() {
-        if(document.getElementById('lUser').value !== "") {
-            document.getElementById('login-page').style.display = 'none';
-            initData();
-        }
+        const u = document.getElementById('lUser').value.toLowerCase();
+        if(u) { document.getElementById('login-page').style.display='none'; initData(); }
     }
     document.getElementById('btnLogin').onclick = doLogin;
 
     function initData() {
         const k = document.getElementById('selKls').value;
-        const m = ["Bahasa Indonesia", "Matematika", "Pendidikan Pancasila", "Seni Budaya", "IPAS"];
-        document.getElementById('selMapel').innerHTML = m.map(v => `<option value="${v}">${v}</option>`).join('');
-        document.getElementById('f-engine').className = "page-section " + (k <= 2 ? "font-arial" : "font-tnr");
+        const mSelect = document.getElementById('selMapel');
+        if(mSelect.options.length === 0) {
+            ["Pendidikan Pancasila", "Bahasa Indonesia", "Matematika", "IPAS", "PAI", "Bahasa Inggris", "Bahasa Sunda"].forEach(x => {
+                let opt = document.createElement("option"); opt.value = x; opt.text = x; mSelect.add(opt);
+            });
+        }
+        const m = mSelect.value;
+        document.getElementById('f-engine').className = (k <= 2) ? "font-arial" : "font-tnr";
         
         db.ref('kkg_tp').on('value', snap => {
-            cacheTP = snap.val() ? Object.values(snap.val()).filter(x => x.k == k && x.m == document.getElementById('selMapel').value) : [];
-            document.getElementById('bodyTP').innerHTML = cacheTP.map(d => `<tr><td style="border:1px solid #ddd; padding:5px;">${d.e}</td><td style="border:1px solid #ddd; padding:5px;">${d.tp}</td><td style="border:1px solid #ddd; padding:5px;"><button onclick="db.ref('kkg_tp/${d.id}').remove()">X</button></td></tr>`).join('');
+            cacheTP = snap.val() ? Object.values(snap.val()).filter(x => x.k == k && x.m == m) : [];
+            document.getElementById('bodyTP').innerHTML = cacheTP.map(d => `<tr><td>${d.tp}</td></tr>`).join('');
             document.getElementById('sTP').innerHTML = cacheTP.map(d => `<option value="${d.tp}">${d.tp}</option>`).join('');
-            db.ref('kkg_soal').on('value', sSoal => {
-                renderAll(sSoal.val() ? Object.values(sSoal.val()).filter(x => x.k == k && x.m == document.getElementById('selMapel').value) : [], k);
-            });
+        });
+
+        db.ref('kkg_soal').on('value', snap => {
+            const dataSoal = snap.val() ? Object.values(snap.val()).filter(x => x.k == k && x.m == m) : [];
+            renderAll(dataSoal, k);
         });
     }
 
     function renderAll(soals, kls) {
         document.getElementById('p-mapel-val').innerText = document.getElementById('selMapel').value;
         document.getElementById('p-kls-val').innerText = kls;
+
         const pg = soals.filter(x => x.bentuk === 'PG');
         const esai = soals.filter(x => x.bentuk === 'Esai');
 
         document.getElementById('p-naskah').innerHTML = pg.map((s, i) => {
-            const isPendek = (s.oa + s.ob + s.oc + (s.od || "")).length < 50;
             let opsiHTML = "";
+            const isPanjang = (s.oa + s.ob + s.oc + (s.od||"")).length > 50;
 
             if (kls <= 2) {
-                opsiHTML = isPendek 
-                    ? `<table class="opsi-container"><tr><td style="width:33%;">a. ${s.oa}</td><td style="width:33%;">b. ${s.ob}</td><td>c. ${s.oc}</td></tr></table>`
-                    : `a. ${s.oa}<br>b. ${s.ob}<br>c. ${s.oc}`;
+                // KELAS 1-2: Sejajar Rapi
+                opsiHTML = isPanjang 
+                    ? `<div>a. ${s.oa}<br>b. ${s.ob}<br>c. ${s.oc}</div>`
+                    : `<table class="opsi-table"><tr><td>a. ${s.oa}</td><td>b. ${s.ob}</td><td>c. ${s.oc}</td></tr></table>`;
             } else {
-                opsiHTML = isPendek
-                    ? `<table class="opsi-container"><tr><td style="width:50%;">a. ${s.oa}</td><td>b. ${s.ob}</td></tr><tr><td>c. ${s.oc}</td><td>d. ${s.od}</td></tr></table>`
-                    : `a. ${s.oa}<br>b. ${s.ob}<br>c. ${s.oc}<br>d. ${s.od}`;
+                // KELAS 3-6: 2 Kiri 2 Kanan
+                opsiHTML = isPanjang
+                    ? `<div>a. ${s.oa}<br>b. ${s.ob}<br>c. ${s.oc}<br>d. ${s.od}</div>`
+                    : `<table class="opsi-table"><tr><td style="width:50%">a. ${s.oa}</td><td style="width:50%">b. ${s.ob}</td></tr><tr><td>c. ${s.oc}</td><td>d. ${s.od}</td></tr></table>`;
             }
 
-            return `
-                <table class="soal-table">
-                    <tr>
-                        <td class="no-col">${i+1}.</td>
-                        <td>
-                            ${s.imgS ? `<img src="${s.imgS}" class="img-naskah">` : ''}${s.tanya}
-                            <div style="margin-top:2px;">${opsiHTML}</div>
-                        </td>
-                    </tr>
-                </table>`;
+            return `<div class="soal-row"><div class="no-soal">${i+1}.</div><div class="konten-soal">${s.tanya}${opsiHTML}</div></div>`;
         }).join('');
 
         document.getElementById('p-naskah-esai').innerHTML = esai.map((s, i) => 
-            `<table class="soal-table"><tr><td class="no-col">${pg.length+i+1}.</td><td>${s.tanya}</td></tr></table>`).join('');
+            `<div class="soal-row"><div class="no-soal">${pg.length + i + 1}.</div><div class="konten-soal">${s.tanya}</div></div>`
+        ).join('');
     }
 
     function downloadWord() {
         const kls = document.getElementById('selKls').value;
-        const font = kls <= 2 ? "Arial" : "Times New Roman";
-        const content = document.getElementById('printArea').innerHTML;
-        const blob = new Blob(['\ufeff', `<html><head><meta charset='utf-8'><style>body{font-family:${font};font-size:12pt;line-height:1.1;} .no-col{width:25pt;} table{width:100%;border-collapse:collapse;}</style></head><body>${content}</body></html>`], {type:'application/msword'});
+        const mapel = document.getElementById('selMapel').value;
+        const fontName = (kls <= 2) ? "Arial" : "Times New Roman";
+        const konten = document.getElementById('printArea').innerHTML;
+
+        const htmlHeader = `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head><meta charset='utf-8'><style>
+                body { font-family: '${fontName}'; font-size: 12pt; line-height: 1.0; }
+                .kop-table { width: 100%; border-bottom: 4px double black; margin-bottom: 10px; }
+                .kop-table td { border: none !important; padding: 0; }
+                .kop-text h3 { margin: 0; text-align: center; line-height: 1.1; }
+                table { width: 100%; border-collapse: collapse; }
+                .soal-row { margin-bottom: 8px; clear: both; }
+                .no-soal { float: left; width: 30px; font-weight: bold; }
+                .konten-soal { margin-left: 35px; }
+                .opsi-table td { border: none !important; padding: 1px 0; }
+            </style></head><body>`;
+        
+        const blob = new Blob(['\ufeff', htmlHeader + konten + "</body></html>"], { type: 'application/msword' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `Soal_Kelas_${kls}.doc`;
+        link.download = `Soal_${mapel}_Kls${kls}.doc`;
         link.click();
     }
 
-    function saveTP() { db.ref('kkg_tp/'+Date.now()).set({ id:Date.now(), k:document.getElementById('selKls').value, m:document.getElementById('selMapel').value, e:document.getElementById('fElemen').value, tp:document.getElementById('fTp').value }); }
-    function saveSoal() { db.ref('kkg_soal/'+Date.now()).set({ id:Date.now(), k:document.getElementById('selKls').value, m:document.getElementById('selMapel').value, bentuk:document.getElementById('sBentuk').value, tanya:document.getElementById('sTanya').value, oa:document.getElementById('oa').value, ob:document.getElementById('ob').value, oc:document.getElementById('oc').value, od:document.getElementById('od').value, imgS:getSrc('pS') }); alert("Berhasil!"); }
+    function saveTP() {
+        const id = Date.now();
+        db.ref('kkg_tp/'+id).set({ id, k: document.getElementById('selKls').value, m: document.getElementById('selMapel').value, tp: document.getElementById('fTp').value });
+    }
+    function saveSoal() {
+        const id = Date.now();
+        db.ref('kkg_soal/'+id).set({ id, k: document.getElementById('selKls').value, m: document.getElementById('selMapel').value, tp: document.getElementById('sTP').value, lv: document.getElementById('sLv').value, bentuk: document.getElementById('sBentuk').value, tanya: document.getElementById('sTanya').value, oa: document.getElementById('oa').value, ob: document.getElementById('ob').value, oc: document.getElementById('oc').value, od: document.getElementById('od').value, kunci: document.getElementById('sKunci').value, skor: document.getElementById('sSkor').value });
+        alert("Soal Disimpan");
+    }
     function showTab(id) { document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden')); document.getElementById('tab-'+id).classList.remove('hidden'); }
-    function preImg(i, t) { if(i.files[0]){ const r=new FileReader(); r.onload=e=>{ const m=document.getElementById(t); m.src=e.target.result; m.classList.remove('hidden'); }; r.readAsDataURL(i.files[0]); } }
-    function getSrc(id) { const e=document.getElementById(id); return e && e.src.startsWith('data') ? e.src : null; }
     function toggleForm() { document.getElementById('panelPG').style.display = (document.getElementById('sBentuk').value === 'PG') ? 'block' : 'none'; }
-    db.ref(".info/connected").on("value", s => { document.getElementById('db-st').innerText = s.val() ? "ONLINE" : "OFFLINE"; });
+    
+    db.ref(".info/connected").on("value", s => { document.getElementById('db-st').innerText = s.val() ? "● ONLINE" : "○ OFFLINE"; });
+    window.onload = () => { if(localStorage.getItem('kkg_logo')) document.getElementById('p-logo').src = localStorage.getItem('kkg_logo'); };
 </script>
 </body>
 </html>
