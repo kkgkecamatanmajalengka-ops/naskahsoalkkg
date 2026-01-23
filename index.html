@@ -386,14 +386,18 @@ document.querySelectorAll('.table-opsi').forEach(table => {
     });
 
     if (perluMenurun) {
-        const rows = table.querySelectorAll('tr');
-        rows.forEach(row => {
-            row.querySelectorAll('td').forEach(td => {
-                td.colSpan = 2;
-                td.style.display = 'block';
-                td.style.width = '100%';
-            });
-        });
+        if (perluMenurun) {
+    const opsi = [];
+    table.querySelectorAll('td').forEach(td => {
+        opsi.push(td.innerHTML);
+    });
+
+    table.innerHTML = opsi.map(o => `
+        <tr>
+            <td colspan="2" style="width:100%">${o}</td>
+        </tr>
+    `).join('');
+}
     }
 });
         const konten = document.getElementById('f-engine').innerHTML;
@@ -486,6 +490,7 @@ body {
 </script>
 </body>
 </html>
+
 
 
 
