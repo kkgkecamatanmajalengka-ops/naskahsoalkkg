@@ -373,27 +373,18 @@
     const logo = document.getElementById('p-logo').src;
     const mapel = document.getElementById('selMapel').value;
     const kls = document.getElementById('selKls').value;
-const kopWord = `
+        const kopWord = `
 <div class="kop">
 <table>
 <tr>
 <td style="width:80px; text-align:center;">
-<!--[if gte vml 1]>
-<v:shape style="width:70pt;height:70pt" type="#_x0000_t75">
-<v:imagedata src="${logo}" />
-</v:shape>
-<![endif]-->
-<!--[if !vml]>
-<img src="${logo}" width="70" />
-<![endif]-->
+<img src="${logo}">
 </td>
-
 <td style="text-align:center;">
 <div class="judul">SUMATIF TENGAH SEMESTER (STS)</div>
 <div class="judul">SEMESTER 2 SEKOLAH DASAR</div>
 <div class="subjudul">TAHUN AJARAN 2025/2026</div>
 </td>
-
 <td style="width:80px;"></td>
 </tr>
 </table>
@@ -426,10 +417,9 @@ document.querySelectorAll('.table-opsi').forEach(table => {
 }
     }
 });
-        const engine = document.getElementById('f-engine').cloneNode(true);
-const kop = engine.querySelector('.kop-table');
-if (kop) kop.remove(); // HAPUS KOP HTML
-const konten = kopWord + engine.innerHTML;
+        const engineClone = document.getElementById('f-engine').cloneNode(true);
+engineClone.querySelectorAll('.kop-table').forEach(k=>k.remove());
+const konten = kopWord + engineClone.innerHTML;
 
     const fontUtama = (kls <= 2)
         ? "Arial, sans-serif"
@@ -437,18 +427,11 @@ const konten = kopWord + engine.innerHTML;
 
     const htmlHeader = `
 <!DOCTYPE html>
-<html
-xmlns:o="urn:schemas-microsoft-com:office:office"
-xmlns:w="urn:schemas-microsoft-com:office:word"
-xmlns:v="urn:schemas-microsoft-com:vml">
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
 <head>
 <meta charset="utf-8">
-<style>
-...
-</style>
-</head>
-<body>
-`;
 <style>
 /* ===== OPSI PILIHAN GANDA (2 KIRI – 2 KANAN CERDAS) ===== */
 /* ===== OPSI PILIHAN GANDA CERDAS (2 KIRI – 2 KANAN) ===== */
@@ -555,9 +538,4 @@ body {
 </script>
 </body>
 </html>
-
-
-
-
-
 
