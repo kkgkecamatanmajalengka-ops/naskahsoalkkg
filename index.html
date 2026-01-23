@@ -418,16 +418,28 @@ document.querySelectorAll('.table-opsi').forEach(table => {
 /* ===== OPSI PILIHAN GANDA CERDAS (2 KIRI – 2 KANAN) ===== */
 /* ===== OPSI PILIHAN GANDA (2 KIRI – 2 KANAN CERDAS) ===== */
 /* ==== KOP WORD (RAPI & TIDAK TERLALU LEBAR) ==== */
-.kop {
+/* ==== KOP WORD (RAPI & TIDAK TERLALU LEBAR) ==== */
+.kop-table {
     width: 100%;
-    margin-bottom: 10px;
+    max-width: 650px;   /* KUNCI LEBAR KOP */
+    margin: 0 auto 10px auto;
+    border-collapse: collapse;
 }
 
-.kop table {
-    width: 100%;
-    max-width: 650px;      /* INI KUNCI UTAMA */
-    margin: 0 auto;
-    border-collapse: collapse;
+.kop-table td {
+    padding: 4px 6px;
+    vertical-align: middle;
+}
+
+.kop-table img {
+    height: 70px;
+    width: auto;
+}
+
+.kop-text-center h3 {
+    margin: 0;
+    line-height: 1.2;
+    font-size: 13pt;
 }
 
 .kop td {
@@ -519,6 +531,7 @@ body {
 </script>
 </body>
 </html>
+
 
 
 
