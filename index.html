@@ -373,67 +373,69 @@
     const mapel = document.getElementById('selMapel').value;
     const kls = document.getElementById('selKls').value;
 
-    // 1. Ambil salinan area cetak agar tidak merusak tampilan di browser
+    // 1. Clone konten agar tidak merusak tampilan browser
     const contentElement = document.getElementById('f-engine').cloneNode(true);
 
-    // 2. LOGIKA OPSI: Tetap jalankan pengecekan panjang teks untuk Word
-    contentElement.querySelectorAll('.table-opsi').forEach(table => {
-        let perluMenurun = false;
-        table.querySelectorAll('td').forEach(td => {
-            if (td.innerText.trim().length > 45) { perluMenurun = true; }
-        });
-
-        if (perluMenurun) {
-            const opsi = [];
-            table.querySelectorAll('td').forEach(td => { opsi.push(td.innerHTML); });
-            table.innerHTML = opsi.map(o => `<tr><td colspan="2" style="width:100%">${o}</td></tr>`).join('');
-        }
-    });
-
-    // 3. LOGIKA GAMBAR: Pastikan gambar memiliki ukuran fisik agar muncul di Word
+    // 2. Perbaikan Gambar & KOP agar stabil di Word
     const allImages = contentElement.getElementsByTagName('img');
     for (let img of allImages) {
         if (img.src && img.src.startsWith('data:image')) {
-            // Jika ini logo di kop
             if (img.id === 'p-logo') {
-                img.width = 75; 
-                img.height = 75;
+                // Berikan atribut width & height langsung (bukan CSS)
+                img.setAttribute('width', '70');
+                img.setAttribute('height', '70');
+                img.style.width = '70px';
+                img.style.height = '70px';
             } else if (img.classList.contains('img-naskah')) {
-                img.width = 300; // Ukuran gambar soal
+                img.setAttribute('width', '300'); // Batasi lebar gambar soal
+                img.style.width = '300px';
             } else if (img.classList.contains('img-opsi-naskah')) {
-                img.width = 100; // Ukuran gambar di pilihan jawaban
+                img.setAttribute('width', '100'); // Batasi lebar gambar opsi
+                img.style.width = '100px';
             }
         } else {
-            img.remove(); // Hapus elemen img jika tidak ada gambarnya
+            img.remove();
         }
+    }
+
+    // 3. Paksa tabel KOP menggunakan lebar tetap agar tidak melebar
+    const kopTable = contentElement.querySelector('.kop-table');
+    if (kopTable) {
+        kopTable.setAttribute('width', '100%');
+        kopTable.style.width = '100%';
+        // Set lebar kolom logo secara spesifik
+        const tdLogo = kopTable.querySelector('td[width="15%"]');
+        if (tdLogo) tdLogo.setAttribute('width', '80');
     }
 
     const konten = contentElement.innerHTML;
     const fontUtama = (kls <= 2) ? "Arial" : "Times New Roman";
 
-    // 4. Bungkus dengan Header HTML khusus Microsoft Word
+    // 4. Header HTML khusus Word dengan meta tags yang lebih lengkap
     const htmlHeader = `
 <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-<head><meta charset='utf-8'>
+<head>
+<meta charset='utf-8'>
 <style>
-    body { font-family: '${fontUtama}'; font-size: 11pt; }
-    table { width: 100%; border-collapse: collapse; }
-    td { vertical-align: top; padding: 2px; }
-    .kop-table { border-bottom: 3pt double black; margin-bottom: 10px; }
+    body { font-family: '${fontUtama}', serif; font-size: 11pt; }
+    table { border-collapse: collapse; width: 100%; }
+    td { vertical-align: top; padding: 2px; border: none; }
+    .kop-table { border-bottom: 2.25pt double black !important; margin-bottom: 10px; }
     .kop-text-center { text-align: center; }
+    .kop-text-center h3 { margin: 0; padding: 0; font-size: 14pt; }
     .table-opsi td { width: 50%; }
-    img { display: block; margin: 5px 0; }
+    img { display: block; border: 0; }
 </style>
 </head><body>`;
 
     const htmlFooter = "</body></html>";
 
-    // 5. Eksekusi Download
+    // 5. Download
     const blob = new Blob(['\ufeff', htmlHeader + konten + htmlFooter], { type: 'application/msword' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Soal_STS2_${mapel}_Kls${kls}_2026.doc`;
+    a.download = `Naskah_Soal_${mapel}_Kls${kls}.doc`;
     a.click();
     URL.revokeObjectURL(url);
 }
@@ -443,6 +445,7 @@
 </script>
 </body>
 </html>
+
 
 
 
