@@ -584,26 +584,63 @@
             </style>
         `;
 
-        const fullHtml = `
-            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-                <head><meta charset="utf-8">${styles}</head>
-                <body>
-                    <center><h3>KISI-KISI ASESMEN SUMATIF</h3></center>
-                    ${kisiContent}
-                    <br clear="all" style="page-break-before:always">
-                    ${kopWord}
-                    ${naskahHeader}
-                    <hr style="border: 0.5pt solid black;">
-                    ${instruksi}
-                    ${naskahBody}
-                    ${instruksiEsai}
-                    ${esaiBody}
-                    <br clear="all" style="page-break-before:always">
-                    <center><h3>KUNCI JAWABAN & PENSKORAN</h3></center>
-                    <div style="width:80%; margin:auto;">${kunciContent}</div>
-                </body>
-            </html>
-        `;
+        const styles = `
+<style>
+    @page { size: A4; margin: 1.5cm; }
+
+    body {
+        font-family: "${fontType}";
+        font-size: 12pt;
+        line-height: 1.3;
+    }
+p, div, span {
+    margin: 0;
+    padding: 0;
+}
+
+.soal-row {
+    margin-bottom: 10pt;
+}
+
+.opsi-container {
+    margin-top: 4pt;
+}
+
+.stack-vertical div {
+    margin-bottom: 3pt;
+}
+
+.flex-inline span {
+    margin-right: 35pt;
+}
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid black;
+        padding: 4pt;
+        font-size: 11pt;
+    }
+</style>
+`;
+
+const fullHtml = `
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+${styles}
+</head>
+<body>
+
+${document.getElementById('printArea').innerHTML}
+
+</body>
+</html>
+`;
 
         const converted = htmlDocx.asBlob(fullHtml);
         const link = document.createElement('a');
@@ -627,3 +664,4 @@
 </script>
 </body>
 </html>
+
