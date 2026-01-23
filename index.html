@@ -43,7 +43,6 @@
         #printArea { background: white; width: 100%; max-width: 210mm; margin: 0 auto; color: black; }
         .page-section { padding: 0.5cm 0; min-height: 270mm; box-sizing: border-box; background: white; }
         
-        /* Font Settings per Request */
         .font-arial { font-family: Arial, sans-serif !important; font-size: 12pt !important; line-height: 1.4; }
         .font-tnr { font-family: "Times New Roman", serif !important; font-size: 12pt !important; line-height: 1.4; }
         
@@ -55,7 +54,6 @@
         .kop-text { text-align: center; width: 100%; }
         .kop-text h3 { margin: 2px 0; line-height: 1.2; text-transform: uppercase; }
 
-        /* Penyejajaran Nomor Soal */
         .soal-row { display: flex; margin-bottom: 15px; width: 100%; align-items: flex-start; }
         .no-soal { width: 25px; flex-shrink: 0; font-weight: bold; }
         .konten-soal { flex-grow: 1; }
@@ -286,7 +284,6 @@
 </div>
 
 <script>
-    // Konfigurasi Firebase Anda
     const firebaseConfig = {
         apiKey: "AIzaSyBA3VSLrRL6d9y0HdQM-H0Y7z2VisMHl_I",
         authDomain: "kkgmajalengka2026.firebaseapp.com",
@@ -369,7 +366,6 @@
         selMapel.innerHTML = opts.map(mapel => `<option value="${mapel}" ${mapel === m ? 'selected' : ''}>${mapel}</option>`).join('');
         document.getElementById('od-w').style.display = (k <= 2) ? "none" : "block";
         
-        // Font logic per request
         document.getElementById('f-engine').className = "page-section " + (k <= 2 ? "font-arial" : "font-tnr");
 
         db.ref('kkg_tp').on('value', snap => {
@@ -406,40 +402,37 @@
 
         document.getElementById('p-naskah').innerHTML = pg.map((s, i) => {
             const hasImgOpsi = s.imgOA || s.imgOB || s.imgOC || s.imgOD;
-            const isPendek = (s.oa + s.ob + s.oc + (s.od || "")).length < 60 && !hasImgOpsi;
+            const isPendek = (s.oa + s.ob + s.oc + (s.od || "")).length < 50 && !hasImgOpsi;
 
             let opsiHTML = "";
             if (kls <= 2) {
-                // KELAS 1-2: Sejajar jika pendek, menurun jika panjang
-                opsiHTML = isPendek 
-                    ? `<div style="display: flex; gap: 30px; margin-top: 5px;"><span>a. ${s.oa}</span><span>b. ${s.ob}</span><span>c. ${s.oc}</span></div>` 
-                    : `<div style="display: flex; flex-direction: column; gap: 5px; margin-top: 5px;">
-                        <div>a. ${renderOpsi(s.oa, s.imgOA)}</div>
-                        <div>b. ${renderOpsi(s.ob, s.imgOB)}</div>
-                        <div>c. ${renderOpsi(s.oc, s.imgOC)}</div>
-                       </div>`;
-            } else {
-                // KELAS 3-6: 2 Kolom (2 kiri 2 kanan) jika pendek, menurun jika panjang
                 if (isPendek) {
                     opsiHTML = `
-                        <table style="width: 100%; border: none; margin-top: 5px; border-collapse: collapse;">
+                        <table style="width: 100%; border: none; margin-top: 2px;">
                             <tr style="border: none;">
-                                <td style="border: none; width: 50%; padding: 2px 0;">a. ${s.oa}</td>
-                                <td style="border: none; width: 50%; padding: 2px 0;">b. ${s.ob}</td>
-                            </tr>
-                            <tr style="border: none;">
-                                <td style="border: none; width: 50%; padding: 2px 0;">c. ${s.oc}</td>
-                                <td style="border: none; width: 50%; padding: 2px 0;">d. ${s.od}</td>
+                                <td style="border: none; width: 33%; padding: 0;">a. ${s.oa}</td>
+                                <td style="border: none; width: 33%; padding: 0;">b. ${s.ob}</td>
+                                <td style="border: none; width: 33%; padding: 0;">c. ${s.oc}</td>
                             </tr>
                         </table>`;
                 } else {
+                    opsiHTML = `<div style="margin-top: 2px;">a. ${renderOpsi(s.oa, s.imgOA)}<br>b. ${renderOpsi(s.ob, s.imgOB)}<br>c. ${renderOpsi(s.oc, s.imgOC)}</div>`;
+                }
+            } else {
+                if (isPendek) {
                     opsiHTML = `
-                        <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 5px;">
-                            <div>a. ${renderOpsi(s.oa, s.imgOA)}</div>
-                            <div>b. ${renderOpsi(s.ob, s.imgOB)}</div>
-                            <div>c. ${renderOpsi(s.oc, s.imgOC)}</div>
-                            <div>d. ${renderOpsi(s.od, s.imgOD)}</div>
-                        </div>`;
+                        <table style="width: 100%; border: none; margin-top: 2px;">
+                            <tr style="border: none;">
+                                <td style="border: none; width: 50%; padding: 0;">a. ${s.oa}</td>
+                                <td style="border: none; width: 50%; padding: 0;">b. ${s.ob}</td>
+                            </tr>
+                            <tr style="border: none;">
+                                <td style="border: none; width: 50%; padding: 0;">c. ${s.oc}</td>
+                                <td style="border: none; width: 50%; padding: 0;">d. ${s.od}</td>
+                            </tr>
+                        </table>`;
+                } else {
+                    opsiHTML = `<div style="margin-top: 2px;">a. ${renderOpsi(s.oa, s.imgOA)}<br>b. ${renderOpsi(s.ob, s.imgOB)}<br>c. ${renderOpsi(s.oc, s.imgOC)}<br>d. ${renderOpsi(s.od, s.imgOD)}</div>`;
                 }
             }
 
@@ -447,10 +440,7 @@
                 <div class="soal-row">
                     <div class="no-soal">${i+1}.</div>
                     <div class="konten-soal">
-                        <div>
-                            ${s.imgS ? `<img src="${s.imgS}" class="img-naskah">` : ''} 
-                            ${s.tanya}
-                        </div>
+                        <div>${s.imgS ? `<img src="${s.imgS}" class="img-naskah">` : ''}${s.tanya}</div>
                         <div class="opsi-container">${opsiHTML}</div>
                     </div>
                 </div>`;
@@ -488,14 +478,16 @@
             <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
             <head><meta charset='utf-8'>
                 <style>
-                    body { font-family: '${fontName}'; font-size: 12pt; }
-                    table { border-collapse: collapse; width: 100%; }
-                    th, td { border: 1px solid black; padding: 5px; }
-                    .soal-row { display: block; margin-bottom: 15px; }
+                    body { font-family: '${fontName}'; font-size: 12pt; line-height: 1.0; }
+                    p, div, span, td, th { font-family: '${fontName}'; font-size: 12pt; line-height: 1.0; margin: 0; padding: 0; }
+                    table { border-collapse: collapse; width: 100%; margin: 0; }
+                    th, td { border: 1px solid black; padding: 3px; }
+                    .kop { text-align: center; border-bottom: 3pt double black; margin-bottom: 10px; }
+                    .kop h3 { margin: 0; padding: 0; line-height: 1.0; text-transform: uppercase; font-size: 12pt; }
+                    .soal-row { margin-bottom: 8px; clear: both; page-break-inside: avoid; }
                     .no-soal { width: 30px; float: left; font-weight: bold; }
                     .konten-soal { margin-left: 35px; }
-                    .opsi-container { margin-top: 5px; clear: both; }
-                    .kop { text-align: center; border-bottom: 4px double black; margin-bottom: 20px; }
+                    .opsi-container { margin-top: 2px; }
                     .no-print { display: none; }
                 </style>
             </head><body>`;
@@ -510,7 +502,6 @@
         URL.revokeObjectURL(url);
     }
 
-    // Fungsi Database Lainnya (CRUD)
     function updateStats(soals) {
         const t = soals.length; if (t === 0) return;
         const l1 = soals.filter(x => x.lv === 'L1').length, l2 = soals.filter(x => x.lv === 'L2').length, l3 = soals.filter(x => x.lv === 'L3').length;
