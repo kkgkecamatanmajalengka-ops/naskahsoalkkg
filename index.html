@@ -1,6 +1,30 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+<meta charset="utf-8">
+<title>KKG STS FIX MERGED</title>
+<style>
+body{font-family:Arial,sans-serif}
+.login-box{max-width:300px;margin:40px auto}
+button{padding:6px 12px}
+#app{display:none}
+</style>
+</head>
+<body>
+
+<div class="login-box" id="loginBox">
+  <h3>Login</h3>
+  <input id="user" placeholder="user"><br><br>
+  <input id="pass" type="password" placeholder="password"><br><br>
+  <button onclick="login()">Login</button>
+</div>
+
+<div id="app">
+  <h3>Aplikasi</h3>
+  <!-- konten lama -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aplikasi KKG 2026 - STS Semester 2</title>
@@ -417,9 +441,7 @@ document.querySelectorAll('.table-opsi').forEach(table => {
 }
     }
 });
-        const engineClone = document.getElementById('f-engine').cloneNode(true);
-engineClone.querySelectorAll('.kop-table').forEach(k=>k.remove());
-const konten = kopWord + engineClone.innerHTML;
+        const konten = kopWord + document.getElementById('f-engine').innerHTML;
 
     const fontUtama = (kls <= 2)
         ? "Arial, sans-serif"
@@ -539,3 +561,19 @@ body {
 </body>
 </html>
 
+
+</div>
+
+<script>
+function login(){
+  if(document.getElementById('user').value){
+    document.getElementById('loginBox').style.display='none';
+    document.getElementById('app').style.display='block';
+  }else{
+    alert('isi user');
+  }
+}
+</script>
+
+</body>
+</html>
