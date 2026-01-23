@@ -378,7 +378,7 @@
 <table>
 <tr>
 <td style="width:80px; text-align:center;">
-<img src="${logo}">
+<img src="${logo}" width="70" alt="logo">
 </td>
 <td style="text-align:center;">
 <div class="judul">SUMATIF TENGAH SEMESTER (STS)</div>
@@ -417,7 +417,9 @@ document.querySelectorAll('.table-opsi').forEach(table => {
 }
     }
 });
-        const konten = kopWord + document.getElementById('f-engine').innerHTML;
+        const engine = document.getElementById('f-engine').cloneNode(true);
+engine.querySelector('.kop-table')?.remove(); // HAPUS KOP HTML
+const konten = kopWord + engine.innerHTML;
 
     const fontUtama = (kls <= 2)
         ? "Arial, sans-serif"
