@@ -443,7 +443,8 @@ document.querySelectorAll('.table-opsi').forEach(table => {
     }
 });
         const engine = document.getElementById('f-engine').cloneNode(true);
-engine.querySelector('.kop-table')?.remove(); // HAPUS KOP HTML
+const kop = engine.querySelector('.kop-table');
+if (kop) kop.remove(); // HAPUS KOP HTML
 const konten = kopWord + engine.innerHTML;
 
     const fontUtama = (kls <= 2)
@@ -570,6 +571,7 @@ body {
 </script>
 </body>
 </html>
+
 
 
 
