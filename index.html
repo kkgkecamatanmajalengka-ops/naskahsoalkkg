@@ -28,6 +28,41 @@
 
         /* CSS KHUSUS CETAK */
         @media print {
+            @media print {
+
+    /* ===== ANTI TERPOTONG SOAL + OPSI ===== */
+
+    .soal-block {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .table-naskah,
+    .table-naskah tr,
+    .table-naskah td {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        vertical-align: top;
+    }
+
+    .no-soal {
+        width: 25px;
+        white-space: nowrap;
+    }
+
+    .table-opsi,
+    .table-opsi tr,
+    .table-opsi td {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        vertical-align: top;
+    }
+
+    img {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+}
             @page { size: A4; margin: 1.5cm; }
             body { background: white !important; }
             .no-print { display: none !important; }
@@ -519,3 +554,4 @@ body {
 </script>
 </body>
 </html>
+
