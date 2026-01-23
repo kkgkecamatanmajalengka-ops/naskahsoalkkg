@@ -380,9 +380,9 @@ document.querySelectorAll('.table-opsi').forEach(table => {
     let perluMenurun = false;
 
     table.querySelectorAll('td').forEach(td => {
-        if (td.innerText.length > 80) { // ambang panjang
-            perluMenurun = true;
-        }
+        if (td.innerText.trim().length > 45) {
+    perluMenurun = true;
+}
     });
 
     if (perluMenurun) {
@@ -490,6 +490,7 @@ body {
 </script>
 </body>
 </html>
+
 
 
 
