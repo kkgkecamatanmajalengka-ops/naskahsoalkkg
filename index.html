@@ -26,24 +26,45 @@
         .img-pre { max-height: 80px; display: block; margin: 5px 0; border: 1px solid #ddd; }
         .hidden { display: none; }
 
+        /* CSS KHUSUS CETAK */
         @media print {
             @page { size: A4; margin: 1.5cm; }
             body { background: white !important; }
             .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            .page-section { page-break-after: always; padding: 0; margin: 0; border: none; }
+            .soal-block { page-break-inside: avoid !important; margin-bottom: 10px; }
             #printArea { width: 100% !important; }
         }
 
         #printArea { background: white; width: 100%; color: black; }
-        .kop-table { width: 100%; border-bottom: 4px double black !important; margin-bottom: 10px; border-collapse: collapse; }
-        .kop-table td { border: none !important; padding: 2px !important; vertical-align: middle; }
-        .kop-text-center { text-align: center; line-height: 1.1 !important; }
-        .kop-text-center h3 { margin: 0; padding: 0; text-transform: uppercase; font-size: 14pt; }
-
-        .table-naskah { width: 100%; border-collapse: collapse; margin-bottom: 5px; }
-        .table-naskah td { border: none !important; padding: 2px 0; vertical-align: top; font-size: 11pt; }
+        .font-arial { font-family: Arial, sans-serif !important; }
+        .font-tnr { font-family: "Times New Roman", serif !important; }
         
+        /* KOP RAPAT */
+        .kop-table { width: 100%; border: none !important; border-bottom: 4px double black !important; margin-bottom: 10px; }
+        .kop-table td { border: none !important; padding: 0 !important; vertical-align: middle; }
+        .kop-text-center { text-align: center; line-height: 1.1 !important; }
+        .kop-text-center h3 { margin: 0; padding: 2px 0; text-transform: uppercase; font-size: 14pt; }
+
+        /* PENOMORAN SEJAJAR */
+        .table-naskah { width: 100%; border: none !important; border-collapse: collapse; margin-bottom: 5px; }
+        .table-naskah td { border: none !important; padding: 2px 0; vertical-align: top; font-size: 12pt; }
+        
+        /* OPSI JAWABAN */
+        .table-opsi { width: 100%; border: none !important; margin-top: 4px; border-collapse: collapse; }
+        .table-opsi td { border: none !important; padding: 1px 0; font-size: 12pt; vertical-align: top; }
+
+        .img-naskah { max-height: 150px; max-width: 100%; object-fit: contain; display: block; margin: 5px 0; }
+        .img-opsi-naskah { max-height: 80px; display: block; margin-top: 5px; }
+        
+        /* LOGIN & STATS */
         #login-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f1f5f9; z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .login-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 350px; }
+        .stat-bar { height: 30px; background: #e2e8f0; border-radius: 15px; overflow: hidden; display: flex; margin: 20px 0; border: 1px solid #cbd5e1; }
+        .progress-l1 { background: var(--s); height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: bold; }
+        .progress-l2 { background: var(--a); height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: bold; }
+        .progress-l3 { background: var(--d); height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -111,24 +132,25 @@
             <div class="grid">
                 <div><label>Pilih TP</label><select id="sTP"></select></div>
                 <div><label>Indikator</label><input type="text" id="sInd"></div>
-                <div><label>Level</label><select id="sLv"><option value="L1">L1</option><option value="L2">L2</option><option value="L3">L3</option></select></div>
+                <div><label>Level</label><select id="sLv"><option value="L1">L1 (Mudah)</option><option value="L2">L2 (Sedang)</option><option value="L3">L3 (Sukar)</option></select></div>
                 <div><label>Bentuk</label><select id="sBentuk" onchange="toggleForm()"><option value="PG">Pilihan Ganda</option><option value="Esai">Esai</option></select></div>
             </div>
             <div style="margin-top:15px;">
-                <label>Pertanyaan</label>
+                <label>Pertanyaan / Stimulus</label>
                 <textarea id="sTanya" rows="3"></textarea>
+                <input type="file" onchange="preImg(this,'pS')"><img id="pS" class="img-pre hidden">
             </div>
             <div id="panelPG" style="margin-top:15px;">
                 <div class="grid">
-                    <div><label>Opsi a</label><input type="text" id="oa"></div>
-                    <div><label>Opsi b</label><input type="text" id="ob"></div>
-                    <div><label>Opsi c</label><input type="text" id="oc"></div>
-                    <div id="od-w"><label>Opsi d</label><input type="text" id="od"></div>
+                    <div><label>Opsi a</label><input type="text" id="oa"><input type="file" onchange="preImg(this,'pOA')"><img id="pOA" class="img-pre hidden"></div>
+                    <div><label>Opsi b</label><input type="text" id="ob"><input type="file" onchange="preImg(this,'pOB')"><img id="pOB" class="img-pre hidden"></div>
+                    <div><label>Opsi c</label><input type="text" id="oc"><input type="file" onchange="preImg(this,'pOC')"><img id="pOC" class="img-pre hidden"></div>
+                    <div id="od-w"><label>Opsi d</label><input type="text" id="od"><input type="file" onchange="preImg(this,'pOD')"><img id="pOD" class="img-pre hidden"></div>
                 </div>
             </div>
             <div class="grid" style="margin-top:15px;">
                 <div><label>Kunci</label><input type="text" id="sKunci"></div>
-                <div><label>Skor</label><input type="number" id="sSkor" value="1"></div>
+                <div><label>Skor Maks</label><input type="number" id="sSkor" value="1"></div>
             </div>
             <button class="btn btn-green" style="width:100%; margin-top:20px;" onclick="saveSoal()">SIMPAN SOAL</button>
         </div>
@@ -141,46 +163,61 @@
             <button class="btn btn-green" style="background:#2b5797;" onclick="downloadWord()">DOWNLOAD WORD</button>
         </div>
         <div id="printArea">
-            <div id="naskah-container">
+            <div class="page-section">
+                <center><h3>KISI-KISI ASESMEN SUMATIF</h3></center>
+                <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+                    <thead><tr style="background:#eee;"><th>No</th><th>Elemen</th><th>TP</th><th>Indikator</th><th>Lvl</th><th>Bentuk</th></tr></thead>
+                    <tbody id="p-kisi"></tbody>
+                </table>
+            </div>
+            <div class="page-section" id="f-engine">
                 <table class="kop-table">
                     <tr>
-                        <td width="12%"><img id="p-logo" src="" style="width:70px;"></td>
+                        <td width="15%"><img id="p-logo" src="" style="height:75px;"></td>
                         <td class="kop-text-center">
                             <h3>SUMATIF TENGAH SEMESTER (STS)</h3>
                             <h3>SEMESTER 2 SEKOLAH DASAR</h3>
-                            <h3 style="font-size:11pt">TAHUN AJARAN 2025/2026</h3>
+                            <h3 style="font-size:12pt">TAHUN AJARAN 2025/2026</h3>
                         </td>
-                        <td width="12%"></td>
+                        <td width="15%"></td>
                     </tr>
                 </table>
-                <table style="width:100%; font-weight:bold; margin-bottom:10px; font-size:11pt;">
-                    <tr>
-                        <td width="18%">Mata Pelajaran</td><td width="2%">:</td><td width="35%"><span id="p-mapel-val"></span></td>
-                        <td width="12%">Nama</td><td width="2%">:</td><td width="31%">...........................</td>
-                    </tr>
-                    <tr>
-                        <td>Kelas</td><td>:</td><td><span id="p-kls-val"></span></td>
-                        <td>Nomor</td><td>:</td><td>...........................</td>
-                    </tr>
+                <table class="table-naskah" style="font-weight:bold; margin-bottom:10px;">
+                    <tr><td width="18%">Mata Pelajaran</td><td>: <span id="p-mapel-val"></span></td><td width="10%">Nama</td><td>: ...................</td></tr>
+                    <tr><td>Kelas</td><td>: <span id="p-kls-val"></span></td><td>Nomor</td><td>: ...................</td></tr>
                 </table>
-                <div style="border-top:1px solid black; border-bottom:1px solid black; padding:3px; font-weight:bold; font-size:10pt; margin-bottom:10px; background:#eee;">I. Berilah tanda silang (X) pada huruf a, b, c, atau d pada jawaban yang paling benar!</div>
+                <div style="border:1px solid black; border-left:none; border-right:none; padding:4px; font-weight:bold; margin-bottom:10px;">I. Berilah tanda silang (X) pada huruf a, b, c, atau d pada jawaban yang paling benar!</div>
                 <div id="p-naskah"></div>
-                <div style="border-top:1px solid black; border-bottom:1px solid black; padding:3px; font-weight:bold; font-size:10pt; margin:15px 0 10px 0; background:#eee;">II. Isilah titik-titik di bawah ini dengan jawaban yang benar!</div>
+                <div style="font-weight:bold; margin-top:15px; margin-bottom:10px;">II. Isilah titik-titik di bawah ini dengan jawaban yang benar!</div>
                 <div id="p-naskah-esai"></div>
+            </div>
+            <div class="page-section">
+                <center><h3>KUNCI JAWABAN & SKOR</h3></center>
+                <table style="width:60%; margin:20px auto; border-collapse:collapse;">
+                    <thead><tr style="background:#eee;"><th>No</th><th>Kunci</th><th>Skor</th></tr></thead>
+                    <tbody id="p-kunci"></tbody>
+                </table>
             </div>
         </div>
     </div>
 
     <div id="tab-db" class="tab-content hidden no-print">
         <div class="card">
-            <h3>Backup/Restore</h3>
-            <button class="btn btn-blue" onclick="exportData()">EXPORT JSON</button>
+            <h3>Statistik Level Kognitif</h3>
+            <div class="stat-bar"><div id="bar-l1" class="progress-l1"></div><div id="bar-l2" class="progress-l2"></div><div id="bar-l3" class="progress-l3"></div></div>
+        </div>
+        <div class="card">
+            <h3>Manajemen Data</h3>
+            <div class="grid">
+                <button class="btn btn-blue" onclick="exportData()">EXPORT JSON (BACKUP)</button>
+                <input type="file" id="importFile" onchange="importData(this.files[0])">
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // 1. CONFIG
+    // 1. CONFIG FIREBASE
     const firebaseConfig = {
         apiKey: "AIzaSyBA3VSLrRL6d9y0HdQM-H0Y7z2VisMHl_I",
         authDomain: "kkgmajalengka2026.firebaseapp.com",
@@ -192,136 +229,293 @@
     let cacheTP = [];
     let currentUser = { role: null, kls: null };
 
-    // 2. LOGIN (Cukup Sekali)
+    // 2. SISTEM LOGIN
     document.getElementById('btnLogin').onclick = () => {
         const u = document.getElementById('lUser').value.toLowerCase();
         const p = document.getElementById('lPass').value;
         const sK = document.getElementById('selKls');
+        const ud = document.getElementById('user-display');
         
         if(u === 'admin' && p === 'admin123') { 
-            currentUser = { role: 'admin', kls: '1' }; 
+            currentUser = { role: 'admin', kls: 'all' }; 
             sK.innerHTML = [1,2,3,4,5,6].map(v => `<option value="${v}">Kelas ${v}</option>`).join('');
         } else if(u.startsWith('guru') && p === 'guru123') { 
             const k = u.replace('guru',''); 
             currentUser = { role: 'guru', kls: k }; 
             sK.innerHTML = `<option value="${k}">Kelas ${k}</option>`;
         } else if(u === 'pai' && p === 'pai123') { 
-            currentUser = { role: 'pai', kls: '1' }; 
+            currentUser = { role: 'pai', kls: 'all' }; 
             sK.innerHTML = [1,2,3,4,5,6].map(v => `<option value="${v}">Kelas ${v}</option>`).join('');
         } else if(u === 'inggris' && p === 'inggris123') { 
-            currentUser = { role: 'inggris', kls: '3' }; 
+            currentUser = { role: 'inggris', kls: 'all' }; 
             sK.innerHTML = [3,4,5,6].map(v => `<option value="${v}">Kelas ${v}</option>`).join('');
-        } else { alert("User/Pass Salah!"); return; }
+        } else { alert("Login Gagal!"); return; }
 
-        document.getElementById('user-display').innerText = "USER: " + u.toUpperCase();
+        ud.innerText = "USER: " + u.toUpperCase();
         document.getElementById('login-page').style.display = 'none';
         initData();
     };
 
+    // 3. INISIALISASI DATA
     function initData() {
         const k = document.getElementById('selKls').value;
         const sM = document.getElementById('selMapel');
+        const m = sM.value;
+        
         let opts = ["Pendidikan Pancasila", "Bahasa Indonesia", "Matematika", "Seni Budaya", "Bahasa Sunda"];
         if(parseInt(k) >= 3) opts.push("IPAS");
+        
         if(currentUser.role === 'pai') opts = ["PAI"];
         if(currentUser.role === 'inggris') opts = ["Bahasa Inggris"];
 
-        sM.innerHTML = opts.map(x => `<option value="${x}">${x}</option>`).join('');
+        sM.innerHTML = opts.map(x => `<option value="${x}" ${x===m?'selected':''}>${x}</option>`).join('');
         document.getElementById('od-w').style.display = (k <= 2) ? 'none' : 'block';
+        document.getElementById('f-engine').className = "page-section " + (k <= 2 ? "font-arial" : "font-tnr");
 
+        // Load TP & Soal
         db.ref('kkg_tp').on('value', snap => {
             cacheTP = snap.val() ? Object.values(snap.val()).filter(x => x.k == k && x.m == sM.value) : [];
-            document.getElementById('bodyTP').innerHTML = cacheTP.map(d => `<tr><td>${d.e}</td><td>${d.tp}</td><td><button class="btn-sm btn-blue" onclick="editTP('${d.id}')">E</button></td></tr>`).join('');
+            document.getElementById('bodyTP').innerHTML = cacheTP.map(d => `<tr><td>${d.e}</td><td>${d.tp}</td><td><button class="btn-sm btn-blue" onclick="editTP('${d.id}')">E</button><button class="btn-sm btn-red" onclick="deleteTP('${d.id}')">X</button></td></tr>`).join('');
             document.getElementById('sTP').innerHTML = cacheTP.map(d => `<option value="${d.tp}">${d.tp}</option>`).join('');
             
             db.ref('kkg_soal').on('value', snapS => {
                 const dataS = snapS.val() ? Object.values(snapS.val()).filter(x => x.k == k && x.m == sM.value) : [];
                 renderCetak(dataS, k);
+                updateStats(dataS);
             });
         });
     }
 
+    // 4. RENDER LOGIKA CETAK (SEJAJAR & 2 KOLOM)
     function renderCetak(soals, kls) {
         document.getElementById('p-mapel-val').innerText = document.getElementById('selMapel').value;
         document.getElementById('p-kls-val').innerText = kls;
+        
         const pg = soals.filter(x => x.bentuk === 'PG');
         const esai = soals.filter(x => x.bentuk === 'Esai');
 
-        document.getElementById('p-naskah').innerHTML = pg.map((s, i) => {
-            let opsi = (kls <= 2) 
-                ? `<table style="width:100%; border:none;"><tr><td width="33%">a. ${s.oa}</td><td width="33%">b. ${s.ob}</td><td>c. ${s.oc}</td></tr></table>`
-                : `<table style="width:100%; border:none;"><tr><td width="50%">a. ${s.oa}</td><td width="50%">b. ${s.ob}</td></tr><tr><td>c. ${s.oc}</td><td>d. ${s.od}</td></tr></table>`;
-            return `<table class="table-naskah"><tr><td width="25"><b>${i+1}.</b></td><td>${s.tanya}${opsi}</td></tr></table>`;
+        // Render Kisi-kisi
+        document.getElementById('p-kisi').innerHTML = soals.map((s, i) => {
+            const tpObj = cacheTP.find(x => x.tp === s.tp);
+            return `<tr><td>${i+1}</td><td>${tpObj?tpObj.e:''}</td><td>${s.tp}</td><td>${s.ind}</td><td>${s.lv}</td><td>${s.bentuk}</td></tr>`;
         }).join('');
 
-        document.getElementById('p-naskah-esai').innerHTML = esai.map((s, i) => `<table class="table-naskah"><tr><td width="25"><b>${pg.length+i+1}.</b></td><td>${s.tanya}</td></tr></table>`).join('');
-        document.getElementById('listSoal').innerHTML = soals.map(s => `<div class="card">${s.tanya} <button onclick="deleteSoal('${s.id}')">X</button></div>`).join('');
+        // Render PG
+        document.getElementById('p-naskah').innerHTML = pg.map((s, i) => {
+            let opsiHTML = "";
+            if (kls <= 2) {
+                // Kelas Bawah: 3 Opsi Sejajar
+                opsiHTML = `<table class="table-opsi"><tr><td width="33%">a. ${s.oa}</td><td width="33%">b. ${s.ob}</td><td>c. ${s.oc}</td></tr></table>`;
+            } else {
+                // Kelas Atas: 2 Kolom (a-b atas, c-d bawah)
+                opsiHTML = `<table class="table-opsi">
+                    <tr><td width="50%">a. ${s.oa} ${s.imgOA?`<br><img src="${s.imgOA}" class="img-opsi-naskah">`:''}</td><td width="50%">b. ${s.ob} ${s.imgOB?`<br><img src="${s.imgOB}" class="img-opsi-naskah">`:''}</td></tr>
+                    <tr><td>c. ${s.oc} ${s.imgOC?`<br><img src="${s.imgOC}" class="img-opsi-naskah">`:''}</td><td>d. ${s.od} ${s.imgOD?`<br><img src="${s.imgOD}" class="img-opsi-naskah">`:''}</td></tr>
+                </table>`;
+            }
+            return `<div class="soal-block"><table class="table-naskah"><tr><td width="25"><b>${i+1}.</b></td><td>${s.imgS?`<img src="${s.imgS}" class="img-naskah">`:''}<div style="text-align:justify;">${s.tanya}</div>${opsiHTML}</td></tr></table></div>`;
+        }).join('');
+
+        // Render Esai
+        document.getElementById('p-naskah-esai').innerHTML = esai.map((s, i) => `<div class="soal-block"><table class="table-naskah"><tr><td width="25"><b>${pg.length+i+1}.</b></td><td>${s.imgS?`<img src="${s.imgS}" class="img-naskah">`:''}<div style="text-align:justify;">${s.tanya}</div></td></tr></table></div>`).join('');
+
+        // Render Kunci
+        document.getElementById('p-kunci').innerHTML = soals.map((s, i) => `<tr><td align="center">${i+1}</td><td align="center" style="text-transform:uppercase">${s.kunci}</td><td align="center">${s.skor}</td></tr>`).join('');
+
+        // List Editor
+        document.getElementById('listSoal').innerHTML = soals.map(s => `<div class="card" style="display:flex; justify-content:space-between;"><div><b>[${s.lv}]</b> ${s.tanya.substring(0,60)}...</div><div><button class="btn-sm btn-blue" onclick="editSoal('${s.id}')">E</button><button class="btn-sm btn-red" onclick="deleteSoal('${s.id}')">X</button></div></div>`).join('');
     }
 
-    // 3. FUNGSI DOWNLOAD WORD (PERBAIKAN LOGO & JARAK)
-    function downloadWord() {
-        const logo = document.getElementById('p-logo').src;
-        const mapel = document.getElementById('p-mapel-val').innerText;
-        const kls = document.getElementById('p-kls-val').innerText;
-        const naskah = document.getElementById('p-naskah').innerHTML;
-        const esai = document.getElementById('p-naskah-esai').innerHTML;
-
-        const html = `
-<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-<head><meta charset='utf-8'>
-<style>
-    @page Section1 {size:595.3pt 841.9pt; margin:0.75in 0.75in 0.75in 0.75in;}
-    div.Section1 {page:Section1;}
-    body { font-family: "Arial", sans-serif; font-size: 11pt; }
-    .t-kop { width: 100%; border-bottom: 3px double black; margin-bottom: 10px; border-collapse: collapse; }
-    .t-id { width: 100%; margin-bottom: 10px; font-weight: bold; font-size: 10pt; border-collapse: collapse; }
-    .inst { border: 1px solid black; padding: 3px; font-weight: bold; font-size: 10pt; margin: 5px 0; background: #eee; text-align:center; }
-    table, td { border: none !important; padding: 1px 0; vertical-align: top; }
-</style>
-</head>
-<body>
-<div class='Section1'>
-    <table class='t-kop'>
-        <tr>
-            <td width='12%' align='left'><img src='${logo}' style='width:65px;'></td>
-            <td align='center' style='font-size:12pt; font-weight:bold; line-height:1.1;'>
-                SUMATIF TENGAH SEMESTER (STS)<br>SEMESTER 2 SEKOLAH DASAR<br>TAHUN AJARAN 2025/2026
-            </td>
-            <td width='12%'></td>
-        </tr>
-    </table>
-    <table class='t-id'>
-        <tr><td width="18%">Mata Pelajaran</td><td width="2%">:</td><td width="35%">${mapel}</td><td width="12%">Nama</td><td width="2%">:</td><td width="31%">..................</td></tr>
-        <tr><td>Kelas</td><td>:</td><td>${kls}</td><td>Nomor</td><td>:</td><td>..................</td></tr>
-    </table>
-    <div class='inst'>I. PILIHAN GANDA</div>
-    ${naskah}
-    <div class='inst' style='margin-top:10px;'>II. ESAI</div>
-    ${esai}
-</div>
-</body></html>`;
-
-        const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = `Soal_STS2_${mapel}_Kls${kls}.doc`; a.click();
-    }
-
-    // UTILS
+    // 5. CRUD FUNCTIONS
     function saveTP() {
         const id = document.getElementById('fIdTp').value || Date.now();
         db.ref('kkg_tp/'+id).set({ id, k: document.getElementById('selKls').value, m: document.getElementById('selMapel').value, e: document.getElementById('fElemen').value, tp: document.getElementById('fTp').value })
-        .then(() => { document.getElementById('fElemen').value=""; document.getElementById('fTp').value=""; });
+        .then(() => { document.getElementById('fIdTp').value=""; document.getElementById('fElemen').value=""; document.getElementById('fTp').value=""; });
     }
+    function editTP(id) { db.ref('kkg_tp/'+id).once('value', s => { const d = s.val(); document.getElementById('fIdTp').value = d.id; document.getElementById('fElemen').value = d.e; document.getElementById('fTp').value = d.tp; }); }
+    function deleteTP(id) { if(confirm("Hapus TP?")) db.ref('kkg_tp/'+id).remove(); }
+
     function saveSoal() {
         const id = document.getElementById('fIdSoal').value || Date.now();
-        db.ref('kkg_soal/'+id).set({ id, k: document.getElementById('selKls').value, m: document.getElementById('selMapel').value, tp: document.getElementById('sTP').value, ind: document.getElementById('sInd').value, lv: document.getElementById('sLv').value, bentuk: document.getElementById('sBentuk').value, tanya: document.getElementById('sTanya').value, oa: document.getElementById('oa').value, ob: document.getElementById('ob').value, oc: document.getElementById('oc').value, od: document.getElementById('od').value, kunci: document.getElementById('sKunci').value, skor: document.getElementById('sSkor').value })
-        .then(() => alert("Ok"));
+        const data = {
+            id, k: document.getElementById('selKls').value, m: document.getElementById('selMapel').value,
+            tp: document.getElementById('sTP').value, ind: document.getElementById('sInd').value, lv: document.getElementById('sLv').value,
+            bentuk: document.getElementById('sBentuk').value, tanya: document.getElementById('sTanya').value,
+            oa: document.getElementById('oa').value, ob: document.getElementById('ob').value, oc: document.getElementById('oc').value, od: document.getElementById('od').value,
+            kunci: document.getElementById('sKunci').value, skor: document.getElementById('sSkor').value,
+            imgS: getSrc('pS'), imgOA: getSrc('pOA'), imgOB: getSrc('pOB'), imgOC: getSrc('pOC'), imgOD: getSrc('pOD')
+        };
+        db.ref('kkg_soal/'+id).set(data).then(() => { alert("Berhasil Disimpan!"); resetSoal(); });
     }
+    function editSoal(id) {
+        db.ref('kkg_soal/'+id).once('value', s => {
+            const d = s.val(); document.getElementById('fIdSoal').value = d.id;
+            document.getElementById('sTanya').value = d.tanya; document.getElementById('sInd').value = d.ind;
+            document.getElementById('oa').value = d.oa; document.getElementById('ob').value = d.ob; document.getElementById('oc').value = d.oc; document.getElementById('od').value = d.od;
+            document.getElementById('sKunci').value = d.kunci; document.getElementById('sSkor').value = d.skor;
+            showTab('soal'); toggleForm();
+        });
+    }
+    function deleteSoal(id) { if(confirm("Hapus Soal?")) db.ref('kkg_soal/'+id).remove(); }
+
+    // 6. UTILS
     function updateLogo(i) { if(i.files[0]){ const r=new FileReader(); r.onload=e=>{ document.getElementById('p-logo').src=e.target.result; document.getElementById('logo-preview').src=e.target.result; localStorage.setItem('kkg_logo', e.target.result); }; r.readAsDataURL(i.files[0]); } }
+    function preImg(i, t) { if(i.files[0]){ const r=new FileReader(); r.onload=e=>{ const m=document.getElementById(t); m.src=e.target.result; m.classList.remove('hidden'); }; r.readAsDataURL(i.files[0]); } }
+    function getSrc(id) { const e=document.getElementById(id); return e && e.src.startsWith('data') ? e.src : null; }
+    function resetSoal() { document.getElementById('fIdSoal').value=""; document.getElementById('sTanya').value=""; document.querySelectorAll('.img-pre').forEach(img => { img.src=""; img.classList.add('hidden'); }); }
     function showTab(id) { document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById('tab-'+id).classList.remove('hidden'); document.querySelector(`[onclick="showTab('${id}')"]`).classList.add('active'); }
     function toggleForm() { document.getElementById('panelPG').style.display = (document.getElementById('sBentuk').value === 'PG') ? 'block' : 'none'; }
+    function updateStats(s) { const t=s.length||1; const l1=s.filter(x=>x.lv==='L1').length, l2=s.filter(x=>x.lv==='L2').length, l3=s.filter(x=>x.lv==='L3').length; document.getElementById('bar-l1').style.width=(l1/t*100)+"%"; document.getElementById('bar-l1').innerText=l1+" L1"; document.getElementById('bar-l2').style.width=(l2/t*100)+"%"; document.getElementById('bar-l2').innerText=l2+" L2"; document.getElementById('bar-l3').style.width=(l3/t*100)+"%"; document.getElementById('bar-l3').innerText=l3+" L3"; }
+    function exportData() { db.ref().once('value', s => { const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(s.val())],{type:'application/json'})); a.download='backup_kkg_2026.json'; a.click(); }); }
+    function importData(f) { if(f){ const r=new FileReader(); r.onload=e=>db.ref().set(JSON.parse(e.target.result)).then(()=>location.reload()); r.readAsText(f); } }
+    
+    function downloadWord() {
+    const logo = document.getElementById('p-logo').src;
+    const mapel = document.getElementById('selMapel').value;
+    const kls = document.getElementById('selKls').value;
+
+    // Ambil HANYA isi naskah cetak (sesuai kode lama kamu)
+    // ==== PAKSA OPSI MENURUN JIKA ADA YANG PANJANG ====
+document.querySelectorAll('.table-opsi').forEach(table => {
+    let perluMenurun = false;
+
+    table.querySelectorAll('td').forEach(td => {
+        if (td.innerText.trim().length > 45) {
+    perluMenurun = true;
+}
+    });
+
+    if (perluMenurun) {
+        if (perluMenurun) {
+    const opsi = [];
+    table.querySelectorAll('td').forEach(td => {
+        opsi.push(td.innerHTML);
+    });
+
+    table.innerHTML = opsi.map(o => `
+        <tr>
+            <td colspan="2" style="width:100%">${o}</td>
+        </tr>
+    `).join('');
+}
+    }
+});
+        const konten = document.getElementById('f-engine').innerHTML;
+
+    const fontUtama = (kls <= 2)
+        ? "Arial, sans-serif"
+        : "'Times New Roman', serif";
+
+    const htmlHeader = `
+<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<style>
+/* ===== OPSI PILIHAN GANDA (2 KIRI – 2 KANAN CERDAS) ===== */
+/* ===== OPSI PILIHAN GANDA CERDAS (2 KIRI – 2 KANAN) ===== */
+/* ===== OPSI PILIHAN GANDA (2 KIRI – 2 KANAN CERDAS) ===== */
+/* ==== KOP WORD (RAPI & TIDAK TERLALU LEBAR) ==== */
+.kop {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.kop table {
+    width: 100%;
+    max-width: 650px;      /* INI KUNCI UTAMA */
+    margin: 0 auto;
+    border-collapse: collapse;
+}
+
+.kop td {
+    padding: 4px 6px;
+    vertical-align: middle;
+}
+
+.kop img {
+    width: 70px;
+    height: auto;
+}
+
+.kop .judul {
+    font-size: 14pt;
+    font-weight: bold;
+    line-height: 1.2;
+}
+
+.kop .subjudul {
+    font-size: 11pt;
+    line-height: 1.2;
+}
+
+.table-opsi td {
+    width: 50%;
+    vertical-align: top;      /* teks & angka nempel ke atas */
+    word-wrap: break-word;    /* teks panjang turun baris */
+    white-space: normal;
+    padding-right: 10px;
+}
+body {
+        font-family: ${fontUtama};
+        font-size: 11pt;
+        line-height: 1.5;
+        color: black;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    /* HILANGKAN GARIS TABEL */
+    table, tr, td, th {
+        border: none !important;
+    }
+
+    /* NOMOR SOAL RATA ATAS */
+    td {
+        vertical-align: top !important;
+        padding: 2px 0;
+    }
+
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+</style>
+</head>
+<body>
+`;
+
+    const htmlFooter = `
+</body>
+</html>
+`;
+
+    const blob = new Blob(
+        ['\ufeff', htmlHeader + konten + htmlFooter],
+        { type: 'application/msword' }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Soal_STS2_${mapel}_Kelas_${kls}_2026.doc`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+
+    // Auto-load logo
     window.onload = () => { const l=localStorage.getItem('kkg_logo'); if(l){ document.getElementById('p-logo').src=l; document.getElementById('logo-preview').src=l; } };
+    db.ref(".info/connected").on("value", s => { document.getElementById('db-st').innerText = s.val() ? "● ONLINE" : "○ OFFLINE"; document.getElementById('db-st').style.color = s.val() ? "#10b981" : "#ef4444"; });
 </script>
 </body>
 </html>
