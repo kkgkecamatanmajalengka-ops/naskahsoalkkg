@@ -378,7 +378,32 @@
 <table>
 <tr>
 <td style="width:80px; text-align:center;">
-<img src="${logo}" width="70" alt="logo">
+const kopWord = `
+<div class="kop">
+<table>
+<tr>
+<td style="width:80px; text-align:center;">
+<!--[if gte vml 1]>
+<v:shape style="width:70pt;height:70pt" type="#_x0000_t75">
+<v:imagedata src="${logo}" />
+</v:shape>
+<![endif]-->
+<!--[if !vml]>
+<img src="${logo}" width="70" />
+<![endif]-->
+</td>
+
+<td style="text-align:center;">
+<div class="judul">SUMATIF TENGAH SEMESTER (STS)</div>
+<div class="judul">SEMESTER 2 SEKOLAH DASAR</div>
+<div class="subjudul">TAHUN AJARAN 2025/2026</div>
+</td>
+
+<td style="width:80px;"></td>
+</tr>
+</table>
+</div>
+`;
 </td>
 <td style="text-align:center;">
 <div class="judul">SUMATIF TENGAH SEMESTER (STS)</div>
@@ -538,4 +563,5 @@ body {
 </script>
 </body>
 </html>
+
 
