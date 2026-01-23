@@ -26,64 +26,17 @@
         .img-pre { max-height: 80px; display: block; margin: 5px 0; border: 1px solid #ddd; }
         .hidden { display: none; }
 
-       /* ================== CETAK ================== */
-@media print {
+        /* CSS KHUSUS CETAK */
+        @media print {
+            @page { size: A4; margin: 1.5cm; }
+            body { background: white !important; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            .page-section { page-break-after: always; padding: 0; margin: 0; border: none; }
+            .soal-block { page-break-inside: avoid !important; margin-bottom: 10px; }
+            #printArea { width: 100% !important; }
+        }
 
-    @page {
-        size: A4;
-        margin: 1.5cm;
-    }
-
-    body {
-        background: white !important;
-    }
-
-    .no-print {
-        display: none !important;
-    }
-
-    .print-only {
-        display: block !important;
-    }
-
-    .page-section {
-        page-break-after: always;
-        padding: 0;
-        margin: 0;
-        border: none;
-    }
-
-    /* ===== 1 SOAL = 1 BLOK UTUH ===== */
-    .soal-block {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-        margin-bottom: 10px;
-    }
-
-    .table-naskah,
-    .table-naskah tr,
-    .table-naskah td {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-        vertical-align: top;
-    }
-
-    .table-opsi,
-    .table-opsi tr,
-    .table-opsi td {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-        vertical-align: top;
-    }
-
-    img {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-    }
-
-    #printArea {
-        width: 100% !important;
-    }
         #printArea { background: white; width: 100%; color: black; }
         .font-arial { font-family: Arial, sans-serif !important; }
         .font-tnr { font-family: "Times New Roman", serif !important; }
@@ -566,9 +519,3 @@ body {
 </script>
 </body>
 </html>
-
-
-
-
-
-
