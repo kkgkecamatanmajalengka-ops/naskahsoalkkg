@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi KKG 2026 - STS Semester 2</title>
+    <title>Aplikasi KKG 2026 - FIX</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
@@ -11,97 +11,101 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     
     <style>
-        :root { --p: #1e293b; --a: #2563eb; --s: #10b981; --d: #ef4444; --w: #f59e0b; }
-        body { font-family: 'Inter', sans-serif; background: #f1f5f9; margin: 0; color: #1e293b; }
-        header { background: var(--p); color: white; padding: 15px; text-align: center; border-bottom: 4px solid var(--a); }
-        .nav { display: flex; background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10; overflow-x: auto; }
-        .nav-btn { flex: 1; padding: 12px; border: none; background: none; cursor: pointer; font-weight: 600; color: #64748b; min-width: 100px; }
+        :root { --p: #1e293b; --a: #2563eb; --s: #10b981; --d: #ef4444; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f1f5f9; margin: 0; }
+        header { background: var(--p); color: white; padding: 20px; text-align: center; border-bottom: 4px solid var(--a); }
+        .nav { display: flex; background: white; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 100; }
+        .nav-btn { flex: 1; padding: 15px; border: none; background: none; cursor: pointer; font-weight: bold; color: #64748b; }
         .nav-btn.active { color: var(--a); border-bottom: 3px solid var(--a); }
-        .container { max-width: 1000px; margin: 20px auto; padding: 0 15px; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); margin-bottom: 20px; }
+        .container { max-width: 800px; margin: 20px auto; padding: 0 15px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .hidden { display: none; }
-        .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; color: white; }
+        .btn { padding: 12px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; color: white; width: 100%; transition: 0.3s; }
         .btn-blue { background: var(--a); }
         .btn-green { background: var(--s); }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 5px; box-sizing: border-box; }
-        .img-pre { max-width: 200px; margin-top: 10px; border-radius: 8px; display: block; }
+        .btn-blue:hover, .btn-green:hover { opacity: 0.8; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 8px; box-sizing: border-box; }
+        .img-pre { max-width: 150px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1 style="margin:0; font-size: 20px;">KKG MAJALENGKA 2026</h1>
-    <p id="db-st" style="margin:5px 0 0; font-size:12px;">Connecting...</p>
+    <h1 style="margin:0;">KKG MAJALENGKA 2026</h1>
+    <div id="db-st" style="font-size: 12px; margin-top: 5px;">Connecting...</div>
 </header>
 
-<div class="nav">
+<div class="nav" id="main-nav">
     <button class="nav-btn active" onclick="showTab('beranda')">BERANDA</button>
-    <button class="nav-btn" onclick="showTab('soal')">BANK SOAL</button>
-    <button class="nav-btn" onclick="showTab('naskah')">DOWNLOAD</button>
+    <button class="nav-btn" onclick="showTab('soal')">INPUT SOAL</button>
+    <button class="nav-btn" onclick="showTab('download')">DOWNLOAD</button>
 </div>
 
 <div class="container">
-    <div id="user-display" class="card hidden" style="text-align:center; font-weight:bold; color:var(--a);"></div>
-
     <div id="tab-beranda" class="tab-content">
-        <div id="login-page" class="card">
-            <h3>Login Pengguna</h3>
-            <input type="text" id="lUser" placeholder="Username (Contoh: admin / guru1)">
+        <div id="login-section" class="card">
+            <h3 style="text-align: center;">Login Guru</h3>
+            <input type="text" id="lUser" placeholder="Username (admin / guru1)">
             <input type="password" id="lPass" placeholder="Password">
-            <button class="btn btn-blue" onclick="doLogin()" style="margin-top:15px; width:100%;">MASUK</button>
+            <button class="btn btn-blue" style="margin-top: 15px;" onclick="doLogin()">MASUK APLIKASI</button>
         </div>
-        <div id="admin-tools" class="card hidden">
-            <h3>Pengaturan Logo</h3>
+
+        <div id="admin-section" class="card hidden">
+            <h3 id="welcome-msg">Selamat Datang</h3>
+            <label>Upload Logo Kop:</label>
             <input type="file" onchange="preImg(this, 'p-logo')" accept="image/*">
             <img id="p-logo" class="img-pre hidden">
-            <div style="margin-top:20px; display: flex; gap: 10px;">
-                <button class="btn btn-blue" onclick="exportData()">Backup Data</button>
+            <hr>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-blue" onclick="exportData()">Backup</button>
+                <button class="btn btn-green" onclick="document.getElementById('fImport').click()">Import</button>
                 <input type="file" id="fImport" class="hidden" onchange="importData(this)">
-                <button class="btn btn-green" onclick="document.getElementById('fImport').click()">Import Data</button>
             </div>
+            <button class="btn btn-blue" style="margin-top: 10px; background: #64748b;" onclick="location.reload()">LOGOUT</button>
         </div>
     </div>
 
     <div id="tab-soal" class="tab-content hidden">
         <div class="card">
-            <label>Pilih Kelas & Mata Pelajaran:</label>
+            <label>Filter Soal:</label>
             <select id="selKls" onchange="loadSoal()"></select>
-            <select id="selMapel" onchange="loadSoal()" style="margin-top:10px;"></select>
+            <select id="selMapel" onchange="loadSoal()"></select>
         </div>
+        
         <div class="card">
-            <h3>Input Soal</h3>
+            <h3>Form Soal</h3>
             <input type="hidden" id="fIdSoal">
             <select id="sBentuk" onchange="toggleForm()">
                 <option value="PG">Pilihan Ganda</option>
-                <option value="Esai">Isian/Esai</option>
+                <option value="Esai">Isian / Esai</option>
             </select>
-            <textarea id="sTanya" placeholder="Pertanyaan" rows="3" style="margin-top:10px;"></textarea>
+            <textarea id="sTanya" placeholder="Tulis Pertanyaan..." rows="3"></textarea>
             
             <div id="panelPG">
-                <input type="text" id="oa" placeholder="Opsi A">
-                <input type="text" id="ob" placeholder="Opsi B">
-                <input type="text" id="oc" placeholder="Opsi C">
-                <input type="text" id="od" placeholder="Opsi D">
+                <input type="text" id="oa" placeholder="Pilihan A">
+                <input type="text" id="ob" placeholder="Pilihan B">
+                <input type="text" id="oc" placeholder="Pilihan C">
+                <input type="text" id="od" placeholder="Pilihan D">
             </div>
-            
-            <button class="btn btn-blue" onclick="saveSoal()" style="margin-top:15px; width: 100%;">SIMPAN SOAL</button>
+            <button class="btn btn-blue" style="margin-top: 15px;" onclick="saveSoal()">SIMPAN KE DATABASE</button>
         </div>
         <div id="listSoal"></div>
     </div>
 
-    <div id="tab-naskah" class="tab-content hidden">
+    <div id="tab-download" class="tab-content hidden">
         <div class="card" style="text-align: center;">
-            <h3>Download Naskah Soal</h3>
-            <p>Klik tombol di bawah untuk mendownload soal dalam format Microsoft Word (.docx)</p>
-            <button class="btn btn-green" onclick="exportToWord()" style="padding: 15px 30px; font-size: 16px;">
-                📥 SIMPAN KE WORD
+            <i style="font-size: 50px;">📄</i>
+            <h3>Cetak Naskah Soal</h3>
+            <p>Pastikan Kelas dan Mata Pelajaran sudah dipilih di tab "INPUT SOAL".</p>
+            <button class="btn btn-green" onclick="exportToWord()" style="height: 60px; font-size: 18px;">
+                DOWNLOAD FILE WORD (.DOCX)
             </button>
         </div>
     </div>
 </div>
 
 <script>
-    // Konfigurasi Firebase
+    // 1. Inisialisasi Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyBA3VSLrRL6d9y0HdQM-H0Y7z2VisMHl_I",
         authDomain: "kkgmajalengka2026.firebaseapp.com",
@@ -111,73 +115,69 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let currentUser = { role: null, kls: null };
-
-    // Fungsi Login
+    // 2. Fungsi Login
     function doLogin() {
         const u = document.getElementById('lUser').value.toLowerCase();
         const p = document.getElementById('lPass').value;
-        const selKls = document.getElementById('selKls');
-        
-        if(u === 'admin' && p === 'admin123') {
-            currentUser = { role: 'admin', kls: 'all' };
-            selKls.innerHTML = `<option value="1">Kelas 1</option><option value="2">Kelas 2</option><option value="3">Kelas 3</option><option value="4">Kelas 4</option><option value="5">Kelas 5</option><option value="6">Kelas 6</option>`;
-        } else if(u.startsWith('guru') && p === 'guru123') {
-            const k = u.replace('guru', '');
-            currentUser = { role: 'guru', kls: k };
-            selKls.innerHTML = `<option value="${k}">Kelas ${k}</option>`;
+        const sk = document.getElementById('selKls');
+        const sm = document.getElementById('selMapel');
+
+        if (u === 'admin' && p === 'admin123') {
+            sk.innerHTML = [1,2,3,4,5,6].map(v => `<option value="${v}">Kelas ${v}</option>`).join('');
+        } else if (u.startsWith('guru') && p === 'guru123') {
+            const k = u.replace('guru','');
+            sk.innerHTML = `<option value="${k}">Kelas ${k}</option>`;
         } else {
-            alert("Username atau Password salah!");
-            return;
+            return alert("Username atau Password Salah!");
         }
 
-        document.getElementById('login-page').classList.add('hidden');
-        document.getElementById('admin-tools').classList.remove('hidden');
-        document.getElementById('user-display').innerText = "AKTIF: " + u.toUpperCase();
-        document.getElementById('user-display').classList.remove('hidden');
-        
-        const mapels = ["Pendidikan Pancasila", "Bahasa Indonesia", "Matematika", "Seni Budaya", "IPAS", "Bahasa Sunda"];
-        document.getElementById('selMapel').innerHTML = mapels.map(m => `<option value="${m}">${m}</option>`).join('');
+        const mps = ["Pendidikan Pancasila", "Bahasa Indonesia", "Matematika", "IPAS", "Seni Budaya", "Bahasa Sunda"];
+        sm.innerHTML = mps.map(v => `<option value="${v}">${v}</option>`).join('');
+
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('admin-section').classList.remove('hidden');
+        document.getElementById('welcome-msg').innerText = "Halo, " + u.toUpperCase();
         loadSoal();
     }
 
+    // 3. Fungsi Simpan Soal
     function saveSoal() {
         const id = document.getElementById('fIdSoal').value || Date.now();
-        const k = document.getElementById('selKls').value;
-        const m = document.getElementById('selMapel').value;
-        
-        db.ref('kkg_soal/' + id).set({
-            id, k, m,
+        const data = {
+            id: id,
+            k: document.getElementById('selKls').value,
+            m: document.getElementById('selMapel').value,
             tanya: document.getElementById('sTanya').value,
+            bentuk: document.getElementById('sBentuk').value,
             oa: document.getElementById('oa').value,
             ob: document.getElementById('ob').value,
             oc: document.getElementById('oc').value,
-            od: document.getElementById('od').value,
-            bentuk: document.getElementById('sBentuk').value
-        }).then(() => {
-            alert("Soal berhasil disimpan!");
+            od: document.getElementById('od').value
+        };
+        db.ref('kkg_soal/' + id).set(data).then(() => {
+            alert("Berhasil disimpan!");
             resetSoal();
-            loadSoal();
         });
     }
 
+    // 4. Load & List Soal
     function loadSoal() {
         const k = document.getElementById('selKls').value;
         const m = document.getElementById('selMapel').value;
         db.ref('kkg_soal').on('value', snap => {
             const data = snap.val() ? Object.values(snap.val()) : [];
-            const filtered = data.filter(x => x.k == k && x.m == m);
-            document.getElementById('listSoal').innerHTML = filtered.map(s => `
+            const filter = data.filter(x => x.k == k && x.m == m);
+            document.getElementById('listSoal').innerHTML = filter.map((s, i) => `
                 <div class="card">
-                    <b>${s.bentuk}</b>: ${s.tanya}
-                    <button class="btn btn-blue" onclick="editSoal('${s.id}')" style="font-size:10px; padding:5px;">Edit</button>
+                    <b>${i+1}. [${s.bentuk}]</b> ${s.tanya}
+                    <button onclick="editSoal('${s.id}')" style="float:right; cursor:pointer;">Edit</button>
                 </div>
             `).join('');
         });
     }
 
     function editSoal(id) {
-        db.ref('kkg_soal/' + id).once('value', s => {
+        db.ref('kkg_soal/'+id).once('value', s => {
             const d = s.val();
             document.getElementById('fIdSoal').value = d.id;
             document.getElementById('sTanya').value = d.tanya;
@@ -187,110 +187,79 @@
             document.getElementById('oc').value = d.oc || "";
             document.getElementById('od').value = d.od || "";
             toggleForm();
+            showTab('soal');
         });
     }
 
-    // --- FUNGSI EXPORT KE WORD ---
+    // 5. EKSPORT KE WORD (Fungsi Utama yang Anda Butuhkan)
     window.exportToWord = function() {
         const { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, AlignmentType, VerticalAlign } = docx;
-        const k = document.getElementById('selKls').value;
-        const m = document.getElementById('selMapel').value;
-        const fontName = (parseInt(k) <= 2) ? "Arial" : "Times New Roman";
+        const kls = document.getElementById('selKls').value;
+        const mp = document.getElementById('selMapel').value;
+        const font = (parseInt(kls) <= 2) ? "Arial" : "Times New Roman";
 
         db.ref('kkg_soal').once('value', snap => {
-            const allData = snap.val() ? Object.values(snap.val()) : [];
-            const filtered = allData.filter(x => x.k == k && x.m == m);
+            const data = snap.val() ? Object.values(snap.val()) : [];
+            const filtered = data.filter(x => x.k == kls && x.m == mp);
 
-            if(filtered.length === 0) return alert("Tidak ada soal untuk didownload!");
+            if(filtered.length === 0) return alert("Soal tidak ditemukan!");
 
             const children = [];
             
-            // Kop Surat
-            const logoSrc = document.getElementById('p-logo').src;
-            let headerCells = [];
-            if (logoSrc && logoSrc.startsWith('data')) {
-                const imgData = logoSrc.split(',')[1];
-                headerCells.push(new TableCell({
+            // Header / Kop
+            const logo = document.getElementById('p-logo').src;
+            let hCells = [];
+            if(logo && logo.startsWith('data')) {
+                hCells.push(new TableCell({
                     width: { size: 15, type: WidthType.PERCENTAGE },
-                    children: [new Paragraph({ children: [new ImageRun({ data: Uint8Array.from(atob(imgData), c => c.charCodeAt(0)), transformation: { width: 50, height: 50 } })], alignment: AlignmentType.CENTER })],
+                    children: [new Paragraph({ children: [new ImageRun({ data: Uint8Array.from(atob(logo.split(',')[1]), c => c.charCodeAt(0)), transformation: { width: 50, height: 50 } })], alignment: AlignmentType.CENTER })],
                     borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE }
                 }));
             }
-            headerCells.push(new TableCell({
+            hCells.push(new TableCell({
                 width: { size: 85, type: WidthType.PERCENTAGE },
                 children: [
-                    new Paragraph({ children: [new TextRun({ text: "SUMATIF TENGAH SEMESTER (STS)", bold: true, size: 24, font: fontName })], alignment: AlignmentType.CENTER }),
-                    new Paragraph({ children: [new TextRun({ text: "TAHUN PELAJARAN 2025/2026", size: 20, font: fontName })], alignment: AlignmentType.CENTER })
+                    new Paragraph({ children: [new TextRun({ text: "SUMATIF TENGAH SEMESTER (STS)", bold: true, size: 24, font: font })], alignment: AlignmentType.CENTER }),
+                    new Paragraph({ children: [new TextRun({ text: "TAHUN PELAJARAN 2025/2026", size: 20, font: font })], alignment: AlignmentType.CENTER })
                 ],
                 borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE }
             }));
-            children.push(new Table({ rows: [new TableRow({ children: headerCells })], width: { size: 100, type: WidthType.PERCENTAGE }, borders: { bottom: { style: BorderStyle.DOUBLE, size: 3 } } }));
+            children.push(new Table({ rows: [new TableRow({ children: hCells })], width: { size: 100, type: WidthType.PERCENTAGE }, borders: { bottom: { style: BorderStyle.DOUBLE, size: 3 } } }));
 
             // Isi Soal
-            filtered.forEach((s, i) => {
-                children.push(new Paragraph({ children: [new TextRun({ text: `${i+1}. ${s.tanya}`, font: fontName, size: 24 })], spacing: { before: 200 } }));
+            filtered.forEach((s, idx) => {
+                children.push(new Paragraph({ children: [new TextRun({ text: `${idx+1}. ${s.tanya}`, font: font, size: 24 })], spacing: { before: 200 } }));
                 if(s.bentuk === 'PG') {
-                    children.push(new Paragraph({ children: [new TextRun({ text: `a. ${s.oa}   b. ${s.ob}   c. ${s.oc}   d. ${s.od}`, font: fontName, size: 24 })] }));
+                    children.push(new Paragraph({ children: [new TextRun({ text: `a. ${s.oa}   b. ${s.ob}   c. ${s.oc}   d. ${s.od}`, font: font, size: 24 })] }));
                 }
             });
 
             const doc = new Document({ sections: [{ children }] });
-            Packer.toBlob(doc).then(blob => saveAs(blob, `SOAL_KLS_${k}_${m}.docx`));
+            Packer.toBlob(doc).then(blob => saveAs(blob, `SOAL_STS_KLS${kls}_${mp}.docx`));
         });
     };
 
-    // Fungsi Navigasi & UI
+    // Fungsi UI Pendukung
     function showTab(id) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById('tab-'+id).classList.remove('hidden');
-        const btn = document.querySelector(`[onclick="showTab('${id}')"]`);
-        if(btn) btn.classList.add('active');
+        document.querySelector(`[onclick="showTab('${id}')"]`).classList.add('active');
     }
-
-    function preImg(input, target) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const img = document.getElementById(target);
-                img.src = e.target.result;
-                img.classList.remove('hidden');
-            };
-            reader.readAsDataURL(input.files[0]);
+    function preImg(i, t) {
+        if(i.files[0]){
+            const r = new FileReader();
+            r.onload = e => { const m = document.getElementById(t); m.src = e.target.result; m.classList.remove('hidden'); };
+            r.readAsDataURL(i.files[0]);
         }
     }
-
-    function toggleForm() {
-        document.getElementById('panelPG').style.display = (document.getElementById('sBentuk').value === 'PG') ? 'block' : 'none';
-    }
-
-    function resetSoal() {
-        document.getElementById('fIdSoal').value = "";
-        document.getElementById('sTanya').value = "";
-        document.getElementById('oa').value = "";
-        document.getElementById('ob').value = "";
-        document.getElementById('oc').value = "";
-        document.getElementById('od').value = "";
-    }
-
-    function exportData() {
-        db.ref('kkg_soal').once('value', s => {
-            const b = new Blob([JSON.stringify(s.val())], {type:'application/json'});
-            const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download='backup.json'; a.click();
-        });
-    }
-
-    function importData(f) {
-        const r = new FileReader();
-        r.onload = e => {
-            const d = JSON.parse(e.target.result);
-            if(confirm("Impor data?")) db.ref('kkg_soal').set(d).then(() => location.reload());
-        };
-        r.readAsText(f.files[0]);
-    }
-
+    function toggleForm() { document.getElementById('panelPG').style.display = (document.getElementById('sBentuk').value === 'PG') ? 'block' : 'none'; }
+    function resetSoal() { document.getElementById('fIdSoal').value=""; document.getElementById('sTanya').value=""; document.getElementById('oa').value=""; document.getElementById('ob').value=""; document.getElementById('oc').value=""; document.getElementById('od').value=""; }
+    function exportData() { db.ref('kkg_soal').once('value', s => { const b = new Blob([JSON.stringify(s.val())], {type:'application/json'}); const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download='backup_kkg.json'; a.click(); }); }
+    function importData(f) { const r = new FileReader(); r.onload = e => { const d = JSON.parse(e.target.result); if(confirm("Impor data?")) db.ref('kkg_soal').set(d).then(() => location.reload()); }; r.readAsText(f.files[0]); }
+    
     db.ref(".info/connected").on("value", s => {
-        document.getElementById('db-st').innerText = s.val() ? "● ONLINE" : "○ OFFLINE";
+        document.getElementById('db-st').innerText = s.val() ? "● DATABASE ONLINE" : "○ DATABASE OFFLINE";
         document.getElementById('db-st').style.color = s.val() ? "#10b981" : "#ef4444";
     });
 </script>
