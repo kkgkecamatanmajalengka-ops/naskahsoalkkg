@@ -520,73 +520,71 @@
     const fontType = kls <= 2 ? 'Arial' : 'Times New Roman';
     const logoSrc = document.getElementById('p-logo').src;
 
-    // CSS Khusus untuk memaksa Word (MSO)
-    const msoStyles = `
-        <style>
-            </style>
-    `;
+    // Fungsi pembantu untuk membungkus teks agar font TIDAK BERUBAH ke Calibri
+    const forceFont = (text, isBold = false) => {
+        return `<span style="font-family:'${fontType}'; font-size:12pt; ${isBold ? 'font-weight:bold;' : ''} mso-fareast-font-family:'${fontType}';">${text}</span>`;
+    };
 
-    // 1. KOP - Logo dipaksa 35pt (sekitar 1.2cm) agar terlihat kecil & rapi
+    // 1. KOP - Logo Mungil & Teks Rapat
     const kopWord = `
-        <table style="width:100%; border:none; border-bottom:1.5pt solid black; mso-table-lspace:0pt; mso-table-rspace:0pt; border-collapse:collapse;">
+        <table style="width:100%; border-collapse:collapse; border:none; border-bottom:1.5pt solid black; margin-bottom:2pt;">
             <tr>
-                <td style="width:40pt; padding:0; vertical-align:middle;">
-                    <img src="${logoSrc}" width="45" height="45" style="width:35pt; height:35pt;">
+                <td style="width:40pt; padding:0; vertical-align:middle; border:none;">
+                    <img src="${logoSrc}" width="40" height="40" style="width:30pt; height:30pt;">
                 </td>
-                <td style="text-align:center; padding:0; vertical-align:middle;">
-                    <b style="font-family:'${fontType}'; font-size:11pt; line-height:100%;">SUMATIF TENGAH SEMESTER (STS)<br>
-                    SEMESTER 2 SEKOLAH DASAR<br>
-                    <span style="font-weight:normal; font-size:10pt;">TAHUN AJARAN 2025/2026</span></b>
+                <td style="text-align:center; padding:0; vertical-align:middle; border:none;">
+                    <p style="margin:0; line-height:100%;">${forceFont("SUMATIF TENGAH SEMESTER (STS)", true)}</p>
+                    <p style="margin:0; line-height:100%;">${forceFont("SEMESTER 2 SEKOLAH DASAR", true)}</p>
+                    <p style="margin:0; line-height:100%; font-size:10pt;">${forceFont("TAHUN AJARAN 2025/2026")}</p>
                 </td>
-                <td style="width:40pt; padding:0;"></td>
+                <td style="width:40pt; border:none;"></td>
             </tr>
         </table>
     `;
 
-    // 2. IDENTITAS - Sangat Rapat & Paksa Font 12pt Bold
+    // 2. IDENTITAS - Sangat Rapat & Huruf Terkunci
     const identitasHTML = `
-        <table style="width:100%; border:none; margin-top:5pt; margin-bottom:5pt; font-family:'${fontType}';">
-            <tr style="mso-line-height-rule:exactly; line-height:13pt;">
-                <td style="width:22%; font-size:12pt; font-weight:bold; font-family:'${fontType}';">Mata Pelajaran</td>
-                <td style="width:38%; font-size:12pt; font-weight:bold; font-family:'${fontType}';">: ${mapel}</td>
-                <td style="width:12%; font-size:12pt; font-weight:bold; font-family:'${fontType}';">Nama</td>
-                <td style="font-size:12pt; font-weight:bold; font-family:'${fontType}';">: ...........................</td>
+        <table style="width:100%; border:none; margin-top:4pt; margin-bottom:4pt;">
+            <tr style="mso-line-height-rule:exactly; line-height:12pt;">
+                <td style="width:20%; border:none; padding:0;">${forceFont("Mata Pelajaran", true)}</td>
+                <td style="width:40%; border:none; padding:0;">${forceFont(": " + mapel, true)}</td>
+                <td style="width:12%; border:none; padding:0;">${forceFont("Nama", true)}</td>
+                <td style="border:none; padding:0;">${forceFont(": ...........................", true)}</td>
             </tr>
-            <tr style="mso-line-height-rule:exactly; line-height:13pt;">
-                <td style="font-size:12pt; font-weight:bold; font-family:'${fontType}';">Kelas</td>
-                <td style="font-size:12pt; font-weight:bold; font-family:'${fontType}';">: ${kls}</td>
-                <td style="font-size:12pt; font-weight:bold; font-family:'${fontType}';">Nomor</td>
-                <td style="font-size:12pt; font-weight:bold; font-family:'${fontType}';">: ...........................</td>
+            <tr style="mso-line-height-rule:exactly; line-height:12pt;">
+                <td style="border:none; padding:0;">${forceFont("Kelas", true)}</td>
+                <td style="border:none; padding:0;">${forceFont(": " + kls, true)}</td>
+                <td style="border:none; padding:0;">${forceFont("Nomor", true)}</td>
+                <td style="border:none; padding:0;">${forceFont(": ...........................", true)}</td>
             </tr>
         </table>
     `;
 
     const renderSoalWord = (s, i) => `
-        <table style="width:100%; border:none; margin-bottom:5pt; border-collapse:collapse;">
+        <table style="width:100%; border:none; margin-bottom:3pt; border-collapse:collapse;">
             <tr>
-                <td style="width:22pt; vertical-align:top; font-family:'${fontType}'; font-size:12pt; font-weight:bold; line-height:14pt;">${i}.</td>
-                <td style="vertical-align:top; font-family:'${fontType}'; font-size:12pt; text-align:justify; line-height:14pt;">
-                    ${s.imgS ? `<img src="${s.imgS}" width="150" style="max-width:200pt; margin-bottom:5pt;"><br>` : ''}
-                    ${s.tanya}
-                    <div style="margin-top:3pt;">${renderOpsiWord(s, fontType, kls)}</div>
+                <td style="width:22pt; vertical-align:top; padding:0; border:none;">${forceFont(i + ".", true)}</td>
+                <td style="vertical-align:top; padding:0; border:none; text-align:justify; mso-line-height-rule:exactly; line-height:14pt;">
+                    ${s.imgS ? `<img src="${s.imgS}" width="150" style="max-width:200pt;"><br>` : ''}
+                    ${forceFont(s.tanya)}
+                    <div style="margin-top:2pt;">${renderOpsiWord(s, fontType, kls)}</div>
                 </td>
             </tr>
         </table>
     `;
 
     const renderOpsiWord = (s, font, kls) => {
-        const opsiStyle = `font-family:'${font}'; font-size:12pt;`;
-        const isStack = (s.oa + s.ob + s.oc).length > 30;
-        
-        if (isStack) {
-            return `<table style="border:none;">
-                <tr><td style="${opsiStyle} padding:0;">a. ${s.oa}</td></tr>
-                <tr><td style="${opsiStyle} padding:0;">b. ${s.ob}</td></tr>
-                <tr><td style="${opsiStyle} padding:0;">c. ${s.oc}</td></tr>
-                ${kls > 2 ? `<tr><td style="${opsiStyle} padding:0;">d. ${s.od}</td></tr>` : ''}
-            </table>`;
+        const avgChar = (s.oa + s.ob + s.oc).length / 3;
+        if (avgChar > 25) {
+            return `
+                <table style="border:none;">
+                    <tr><td style="border:none; padding:0;">${forceFont("a. " + s.oa)}</td></tr>
+                    <tr><td style="border:none; padding:0;">${forceFont("b. " + s.ob)}</td></tr>
+                    <tr><td style="border:none; padding:0;">${forceFont("c. " + s.oc)}</td></tr>
+                    ${kls > 2 ? `<tr><td style="border:none; padding:0;">${forceFont("d. " + s.od)}</td></tr>` : ''}
+                </table>`;
         }
-        return `<span style="${opsiStyle}">a. ${s.oa} &nbsp;&nbsp;&nbsp; b. ${s.ob} &nbsp;&nbsp;&nbsp; c. ${s.oc} ${kls > 2 ? `&nbsp;&nbsp;&nbsp; d. ${s.od}` : ''}</span>`;
+        return forceFont(`a. ${s.oa} &nbsp;&nbsp;&nbsp; b. ${s.ob} &nbsp;&nbsp;&nbsp; c. ${s.oc} ${kls > 2 ? `&nbsp;&nbsp;&nbsp; d. ${s.od}` : ''}`);
     };
 
     db.ref('kkg_soal').once('value', snap => {
@@ -595,24 +593,25 @@
         const esai = allSoal.filter(x => x.bentuk === 'Esai');
 
         let bodyContent = pg.map((s, i) => renderSoalWord(s, i + 1)).join('');
-        bodyContent += `<p style="font-weight:bold; margin-top:10pt; font-family:'${fontType}';">II. Isilah titik-titik di bawah ini dengan benar!</p>`;
+        bodyContent += `<p style="margin-top:10pt;">${forceFont("II. Isilah titik-titik di bawah ini dengan benar!", true)}</p>`;
         bodyContent += esai.map((s, i) => renderSoalWord(s, pg.length + i + 1)).join('');
 
         const fullHtml = `
             <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
             <head>
                 <meta charset="utf-8">
-                ${msoStyles}
+                <style>
+                    body { font-family: "${fontType}"; }
+                    table td { font-family: "${fontType}"; }
+                </style>
             </head>
             <body>
-                <div class="Section1">
-                    ${kopWord}
-                    ${identitasHTML}
-                    <div style="border:1pt solid black; padding:2pt; text-align:center; margin-bottom:10pt; font-family:'${fontType}'; font-weight:bold; font-size:10pt;">
-                        Berilah tanda silang (X) pada huruf a, b, c atau d untuk jawaban yang paling benar!
-                    </div>
-                    ${bodyContent}
+                ${kopWord}
+                ${identitasHTML}
+                <div style="border:1pt solid black; padding:2pt; text-align:center; margin-bottom:8pt;">
+                    ${forceFont("Berilah tanda silang (X) pada huruf a, b, c atau d untuk jawaban yang paling benar!", true)}
                 </div>
+                ${bodyContent}
             </body>
             </html>`;
 
@@ -638,6 +637,7 @@
 </script>
 </body>
 </html>
+
 
 
 
