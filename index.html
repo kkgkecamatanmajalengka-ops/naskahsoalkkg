@@ -520,90 +520,95 @@
     const fontType = kls <= 2 ? 'Arial' : 'Times New Roman';
     const logoSrc = document.getElementById('p-logo').src;
 
-    // Fungsi Pengunci Font agar tidak lari ke Calibri
+    // Fungsi Pengunci Font Mutlak (Menggunakan tag XML Word & Font Face)
     const wrapFont = (text, isBold = false) => {
-        return `<font face="${fontType}" style="font-size:12pt; ${isBold ? 'font-weight:bold;' : ''}">${text}</font>`;
+        return `<span style="font-family:'${fontType}'; font-size:12.0pt; ${isBold ? 'font-weight:bold;' : ''} mso-ascii-font-family:'${fontType}'; mso-hansi-font-family:'${fontType}'; mso-bidi-font-family:'${fontType}';">${text}</span>`;
     };
 
-    // 1. KOP (Logo 30pt, Teks Sangat Rapat)
+    // 1. KOP (Logo diperbesar ke 45pt)
     const kopWord = `
-        <table style="width:100%; border-collapse:collapse; border:none; border-bottom:1.5pt solid black; margin-bottom:2pt;">
+        <table style="width:100%; border-collapse:collapse; border:none; border-bottom:2.0pt double black; margin-bottom:5pt;">
             <tr>
-                <td style="width:35pt; padding:0; vertical-align:middle;">
-                    <img src="${logoSrc}" width="40" height="40" style="width:30pt; height:30pt;">
+                <td style="width:50pt; padding:0; vertical-align:middle; border:none;">
+                    <img src="${logoSrc}" width="60" height="60" style="width:45pt; height:45pt;">
                 </td>
-                <td style="text-align:center; padding:0; vertical-align:middle;">
-                    <p style="margin:0; line-height:100%;">${wrapFont("SUMATIF TENGAH SEMESTER (STS)", true)}</p>
-                    <p style="margin:0; line-height:100%;">${wrapFont("SEMESTER 2 SEKOLAH DASAR", true)}</p>
-                    <p style="margin:0; line-height:100%; font-size:10pt;">${wrapFont("TAHUN AJARAN 2025/2026")}</p>
+                <td style="text-align:center; padding:0; vertical-align:middle; border:none;">
+                    <p style="margin:0; line-height:110%;">${wrapFont("SUMATIF TENGAH SEMESTER (STS)", true)}</p>
+                    <p style="margin:0; line-height:110%;">${wrapFont("SEMESTER 2 SEKOLAH DASAR", true)}</p>
+                    <p style="margin:0; line-height:110%; font-size:10pt;">${wrapFont("TAHUN AJARAN 2025/2026")}</p>
                 </td>
-                <td style="width:35pt;"></td>
+                <td style="width:50pt; border:none;"></td>
             </tr>
         </table>
     `;
 
-    // 2. IDENTITAS (Rapat & Bold)
+    // 2. IDENTITAS (Rapat & Font Terkunci)
     const identitasHTML = `
-        <table style="width:100%; border:none; margin-top:2pt; margin-bottom:5pt;">
-            <tr style="mso-line-height-rule:exactly; line-height:12pt;">
-                <td style="width:20%; padding:0;">${wrapFont("Mata Pelajaran", true)}</td>
-                <td style="width:35%; padding:0;">${wrapFont(": " + mapel, true)}</td>
-                <td style="width:12%; padding:0;">${wrapFont("Nama", true)}</td>
-                <td style="padding:0;">${wrapFont(": ...........................", true)}</td>
+        <table style="width:100%; border:none; margin-bottom:8pt;">
+            <tr style="mso-line-height-rule:exactly; line-height:13pt;">
+                <td style="width:20%; border:none; padding:0;">${wrapFont("Mata Pelajaran", true)}</td>
+                <td style="width:35%; border:none; padding:0;">${wrapFont(": " + mapel, true)}</td>
+                <td style="width:12%; border:none; padding:0;">${wrapFont("Nama", true)}</td>
+                <td style="border:none; padding:0;">${wrapFont(": ...........................", true)}</td>
             </tr>
-            <tr style="mso-line-height-rule:exactly; line-height:12pt;">
-                <td style="padding:0;">${wrapFont("Kelas", true)}</td>
-                <td style="padding:0;">${wrapFont(": " + kls, true)}</td>
-                <td style="padding:0;">${wrapFont("Nomor", true)}</td>
-                <td style="padding:0;">${wrapFont(": ...........................", true)}</td>
+            <tr style="mso-line-height-rule:exactly; line-height:13pt;">
+                <td style="border:none; padding:0;">${wrapFont("Kelas", true)}</td>
+                <td style="border:none; padding:0;">${wrapFont(": " + kls, true)}</td>
+                <td style="border:none; padding:0;">${wrapFont("Nomor", true)}</td>
+                <td style="border:none; padding:0;">${wrapFont(": ...........................", true)}</td>
             </tr>
         </table>
     `;
 
-    // 3. LOGIKA OPSI (2x2 untuk Kls 3-6, Sejajar untuk Kls 1-2)
+    // 3. LOGIKA OPSI CERDAS
     const renderOpsiWord = (s) => {
-        const isLong = (s.oa + s.ob + s.oc).length > 40;
+        const textA = s.oa || ""; const textB = s.ob || "";
+        const textC = s.oc || ""; const textD = s.od || "";
+        
+        // Cek jika teks panjang (lebih dari 25 karakter per opsi) -> Menurun
+        const isLong = Math.max(textA.length, textB.length, textC.length, textD.length) > 25;
         
         if (isLong) {
-            // Menurun jika panjang
-            return `<table style="border:none; margin-left:5pt;">
-                <tr><td>${wrapFont("a. " + s.oa)}</td></tr>
-                <tr><td>${wrapFont("b. " + s.ob)}</td></tr>
-                <tr><td>${wrapFont("c. " + s.oc)}</td></tr>
-                ${kls > 2 ? `<tr><td>${wrapFont("d. " + s.od)}</td></tr>` : ''}
-            </table>`;
+            return `
+                <table style="border:none; margin-left:15pt; width:100%;">
+                    <tr><td style="border:none; padding:1pt 0;">${wrapFont("a. " + textA)}</td></tr>
+                    <tr><td style="border:none; padding:1pt 0;">${wrapFont("b. " + textB)}</td></tr>
+                    <tr><td style="border:none; padding:1pt 0;">${wrapFont("c. " + textC)}</td></tr>
+                    ${kls > 2 ? `<tr><td style="border:none; padding:1pt 0;">${wrapFont("d. " + textD)}</td></tr>` : ''}
+                </table>`;
         }
 
         if (kls > 2) {
-            // Kelas 3-6: Kotak 2 Kiri, 2 Kanan
+            // Kelas 3-6: 2 Kiri (A,B) & 2 Kanan (C,D)
             return `
-                <table style="width:100%; border:none; margin-left:5pt;">
+                <table style="width:100%; border:none; margin-left:15pt; border-collapse:collapse;">
                     <tr>
-                        <td style="width:50%;">${wrapFont("a. " + s.oa)}</td>
-                        <td style="width:50%;">${wrapFont("c. " + s.oc)}</td>
+                        <td style="width:50%; border:none; padding:1pt 0;">${wrapFont("a. " + textA)}</td>
+                        <td style="width:50%; border:none; padding:1pt 0;">${wrapFont("c. " + textC)}</td>
                     </tr>
                     <tr>
-                        <td style="width:50%;">${wrapFont("b. " + s.ob)}</td>
-                        <td style="width:50%;">${wrapFont("d. " + s.od)}</td>
+                        <td style="width:50%; border:none; padding:1pt 0;">${wrapFont("b. " + textB)}</td>
+                        <td style="width:50%; border:none; padding:1pt 0;">${wrapFont("d. " + textD)}</td>
                     </tr>
                 </table>`;
         } else {
-            // Kelas 1-2: Sejajar Renggang (A B C)
-            return `<div style="margin-left:5pt; margin-top:3pt;">
-                ${wrapFont("a. " + s.oa)} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-                ${wrapFont("b. " + s.ob)} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-                ${wrapFont("c. " + s.oc)}
-            </div>`;
+            // Kelas 1-2: Sejajar Renggang A B C
+            return `
+                <table style="width:100%; border:none; margin-left:15pt;">
+                    <tr>
+                        <td style="border:none;">${wrapFont("a. " + textA)} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${wrapFont("b. " + textB)} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${wrapFont("c. " + textC)}</td>
+                    </tr>
+                </table>`;
         }
     };
 
     const renderSoalWord = (s, i) => `
-        <table style="width:100%; border:none; margin-bottom:5pt; border-collapse:collapse;">
+        <table style="width:100%; border:none; margin-bottom:6pt; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;">
             <tr>
-                <td style="width:22pt; vertical-align:top; padding:0;">${wrapFont(i + ".", true)}</td>
-                <td style="vertical-align:top; padding:0; text-align:justify; mso-line-height-rule:exactly; line-height:14pt;">
-                    ${s.imgS ? `<img src="${s.imgS}" width="120" style="margin-bottom:3pt;"><br>` : ''}
-                    ${wrapFont(s.tanya)}
+                <td style="width:25pt; vertical-align:top; border:none; padding:0;">${wrapFont(i + ".", true)}</td>
+                <td style="vertical-align:top; border:none; padding:0; text-align:justify;">
+                    ${s.imgS ? `<img src="${s.imgS}" width="150" style="margin-bottom:5pt;"><br>` : ''}
+                    <div style="margin-bottom:3pt;">${wrapFont(s.tanya)}</div>
                     ${renderOpsiWord(s)}
                 </td>
             </tr>
@@ -616,7 +621,7 @@
         const esai = allSoal.filter(x => x.bentuk === 'Esai');
 
         let bodyContent = pg.map((s, i) => renderSoalWord(s, i + 1)).join('');
-        bodyContent += `<p style="margin-top:12pt; border-top:1pt solid black; padding-top:5pt;">${wrapFont("II. Isilah titik-titik di bawah ini dengan benar!", true)}</p>`;
+        bodyContent += `<p style="margin-top:15pt; margin-bottom:10pt;">${wrapFont("II. Isilah titik-titik di bawah ini dengan benar!", true)}</p>`;
         bodyContent += esai.map((s, i) => renderSoalWord(s, pg.length + i + 1)).join('');
 
         const fullHtml = `
@@ -624,14 +629,15 @@
             <head>
                 <meta charset="utf-8">
                 <style>
-                    body { font-family: "${fontType}", serif; }
-                    table, td { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+                    body { font-family: '${fontType}', serif; }
+                    td { font-family: '${fontType}', serif; }
+                    p { margin:0; padding:0; }
                 </style>
             </head>
             <body>
                 ${kopWord}
                 ${identitasHTML}
-                <div style="border:1pt solid black; padding:3pt; text-align:center; margin-bottom:10pt;">
+                <div style="border:1.5pt solid black; padding:4pt; text-align:center; margin-bottom:12pt;">
                     ${wrapFont("Pilihlah salah satu jawaban yang paling tepat dengan memberi tanda silang (X) pada huruf a, b, c, atau d!", true)}
                 </div>
                 ${bodyContent}
@@ -660,6 +666,7 @@
 </script>
 </body>
 </html>
+
 
 
 
