@@ -514,35 +514,57 @@
         }); 
     }
 
-    function exportToWord() {
-        const mapel = document.getElementById('selMapel').value;
-        const kls = document.getElementById('selKls').value;
-        const fontType = kls <= 2 ? 'Arial' : 'Times New Roman';
-        const styles = `<style>
-            @page { size: A4; margin: 1.5cm; }
-            body { font-family: "${fontType}"; font-size: 12pt; line-height: 1.1; }
-            table { width: 100%; border-collapse: collapse; }
-            th, td { border: 0.5pt solid black; padding: 3pt; font-size: 11pt; vertical-align: top; }
-            .kop { border-bottom: 3.5pt double black; margin-bottom: 20px; }
-            .soal-row { margin-bottom: 8pt; display: block; clear: both; }
-            .flex-inline span { margin-right: 25pt; display: inline-block; }
-            .stack-vertical div { margin-bottom: 2pt; }
-            .img-naskah { max-height: 150pt; display: block; margin: 4pt 0; }
-            .img-opsi-naskah { max-height: 65pt; display: block; margin-top: 2pt; }
-        </style>`;
+   function exportToWord() {
+    const mapel = document.getElementById('selMapel').value;
+    const kls = document.getElementById('selKls').value;
+    const fontType = kls <= 2 ? 'Arial' : 'Times New Roman';
+    const logoSrc = document.getElementById('p-logo').src;
 
-        const fullHtml = `
-            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
-            <head><meta charset="utf-8">${styles}</head>
-            <body>${document.getElementById('printArea').innerHTML}</body>
-            </html>`;
+    // Membuat KOP khusus format Word menggunakan Tabel agar rapi
+    const kopWord = `
+        <table style="width: 100%; border: none; border-bottom: 3pt double black; margin-bottom: 10pt;">
+            <tr>
+                <td style="width: 80pt; border: none; vertical-align: middle;">
+                    <img src="${logoSrc}" style="width: 70pt; height: auto;">
+                </td>
+                <td style="text-align: center; border: none; vertical-align: middle;">
+                    <h3 style="margin: 0; padding: 0; text-transform: uppercase; font-size: 14pt;">SUMATIF TENGAH SEMESTER (STS)</h3>
+                    <h3 style="margin: 0; padding: 0; text-transform: uppercase; font-size: 14pt;">SEMESTER 2 SEKOLAH DASAR</h3>
+                    <h3 style="margin: 0; padding: 0; font-size: 12pt;">TAHUN AJARAN 2025/2026</h3>
+                </td>
+                <td style="width: 80pt; border: none;"></td>
+            </tr>
+        </table>
+    `;
 
-        const converted = htmlDocx.asBlob(fullHtml);
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(converted);
-        link.download = `SOAL_STS_${mapel.replace(/ /g,'_')}_KLS_${kls}.doc`;
-        link.click();
-    }
+    // Mengambil konten naskah dan mengganti KOP aslinya dengan KOP tabel
+    let content = document.getElementById('printArea').innerHTML;
+    // Menghapus KOP asli dari konten cetak agar tidak ganda
+    content = content.replace(/<div class="kop">[\s\S]*?<\/div>/, kopWord);
+
+    const styles = `<style>
+        @page { size: A4; margin: 1.5cm; }
+        body { font-family: "${fontType}"; font-size: 12pt; line-height: 1.2; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 0.5pt solid black; padding: 4pt; font-size: 11pt; }
+        .soal-row { margin-bottom: 10pt; clear: both; }
+        .grid-2-col { width: 100%; }
+        .grid-2-col td { border: none; padding: 2pt; }
+        .img-naskah { max-width: 300pt; display: block; margin: 5pt 0; }
+    </style>`;
+
+    const fullHtml = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+        <head><meta charset="utf-8">${styles}</head>
+        <body>${content}</body>
+        </html>`;
+
+    const converted = htmlDocx.asBlob(fullHtml);
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(converted);
+    link.download = `SOAL_STS_${mapel.replace(/ /g,'_')}_KLS_${kls}.doc`;
+    link.click();
+}
 
     function exportData() { db.ref().once('value', s => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(s.val())], {type:'application/json'})); a.download = 'backup_kkg.json'; a.click(); }); }
     function importData(f) { if(f) { const r = new FileReader(); r.onload = e => db.ref().set(JSON.parse(e.target.result)).then(() => location.reload()); r.readAsText(f); } }
@@ -559,3 +581,4 @@
 </script>
 </body>
 </html>
+
