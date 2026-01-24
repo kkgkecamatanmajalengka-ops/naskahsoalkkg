@@ -520,89 +520,90 @@
     const fontType = kls <= 2 ? 'Arial' : 'Times New Roman';
     const logoSrc = document.getElementById('p-logo').src;
 
-    // Fungsi Pengunci Font (Menggunakan Tag Font & Span MSO)
+    // Fungsi Pengunci Font Mutlak
     const f = (text, bold = false) => {
-        return `<span style="font-family:'${fontType}'; font-size:12pt; ${bold ? 'font-weight:bold;' : ''} mso-ascii-font-family:'${fontType}'; mso-hansi-font-family:'${fontType}';"><font face="${fontType}">${text}</font></span>`;
+        const b = bold ? 'font-weight:bold;' : '';
+        return `<span style="font-family:'${fontType}'; font-size:12pt; ${b} mso-ascii-font-family:'${fontType}'; mso-hansi-font-family:'${fontType}';"><font face="${fontType}">${text}</font></span>`;
     };
 
-    // 1. KOP (Logo diperbesar dikit, teks sangat rapat)
+    // 1. KOP (Logo Proporsional & Teks Rapat)
     const kopWord = `
-        <table style="width:100%; border-collapse:collapse; border:none; border-bottom:1.5pt solid black;">
+        <table style="width:100%; border-collapse:collapse; border:none; border-bottom:1.5pt solid black; margin-bottom:2pt;">
             <tr>
-                <td style="width:50pt; padding:0; vertical-align:middle;">
-                    <img src="${logoSrc}" width="55" height="55">
+                <td style="width:60pt; padding:0; vertical-align:middle; border:none;">
+                    <img src="${logoSrc}" width="70" height="70" style="width:55pt; height:55pt;">
                 </td>
-                <td style="text-align:center; padding:0; vertical-align:middle;">
-                    <p style="margin:0; line-height:100%;">${f("SUMATIF TENGAH SEMESTER (STS)", true)}</p>
-                    <p style="margin:0; line-height:100%;">${f("SEMESTER 2 SEKOLAH DASAR", true)}</p>
-                    <p style="margin:0; line-height:100%; font-size:10pt;">${f("TAHUN AJARAN 2025/2026")}</p>
+                <td style="text-align:center; padding:0; vertical-align:middle; border:none;">
+                    <p style="margin:0; mso-line-height-rule:exactly; line-height:100%;">${f("SUMATIF TENGAH SEMESTER (STS)", true)}</p>
+                    <p style="margin:0; mso-line-height-rule:exactly; line-height:100%;">${f("SEMESTER 2 SEKOLAH DASAR", true)}</p>
+                    <p style="margin:0; mso-line-height-rule:exactly; line-height:100%; font-size:10pt;">${f("TAHUN AJARAN 2025/2026")}</p>
                 </td>
-                <td style="width:50pt;"></td>
+                <td style="width:60pt; border:none;"></td>
             </tr>
         </table>
     `;
 
-    // 2. IDENTITAS (Rapat & Font Terkunci)
+    // 2. IDENTITAS (Sangat Rapat)
     const identitasHTML = `
-        <table style="width:100%; border:none; margin-top:5pt; margin-bottom:5pt;">
+        <table style="width:100%; border:none; margin-top:2pt; margin-bottom:4pt;">
             <tr style="mso-line-height-rule:exactly; line-height:12pt;">
-                <td style="width:20%; padding:0;">${f("Mata Pelajaran", true)}</td>
-                <td style="width:35%; padding:0;">${f(": " + mapel, true)}</td>
-                <td style="width:12%; padding:0;">${f("Nama", true)}</td>
-                <td style="padding:0;">${f(": ...........................", true)}</td>
+                <td style="width:20%; padding:0; border:none;">${f("Mata Pelajaran", true)}</td>
+                <td style="width:35%; padding:0; border:none;">${f(": " + mapel, true)}</td>
+                <td style="width:12%; padding:0; border:none;">${f("Nama", true)}</td>
+                <td style="padding:0; border:none;">${f(": ...........................", true)}</td>
             </tr>
             <tr style="mso-line-height-rule:exactly; line-height:12pt;">
-                <td style="padding:0;">${f("Kelas", true)}</td>
-                <td style="padding:0;">${f(": " + kls, true)}</td>
-                <td style="padding:0;">${f("Nomor", true)}</td>
-                <td style="padding:0;">${f(": ...........................", true)}</td>
+                <td style="padding:0; border:none;">${f("Kelas", true)}</td>
+                <td style="padding:0; border:none;">${f(": " + kls, true)}</td>
+                <td style="padding:0; border:none;">${f("Nomor", true)}</td>
+                <td style="padding:0; border:none;">${f(": ...........................", true)}</td>
             </tr>
         </table>
     `;
 
-    // 3. LOGIKA OPSI (Cek panjang teks & Kelas)
+    // 3. LOGIKA OPSI RAPAT
     const renderOpsiWord = (s) => {
         const textA = s.oa || ""; const textB = s.ob || "";
         const textC = s.oc || ""; const textD = s.od || "";
-        const maxLen = Math.max(textA.length, textB.length, textC.length, textD.length);
-        
-        // Jarak soal ke opsi dirapatkan dengan margin-top kecil
-        const wrapperStyle = "margin-top:2pt; margin-left:5pt;";
+        const isLong = Math.max(textA.length, textB.length, textC.length, textD.length) > 35;
 
-        if (maxLen > 30) { // Jika panjang, otomatis menurun
-            return `<div style="${wrapperStyle}">
-                ${f("a. " + textA)}<br>${f("b. " + textB)}<br>${f("c. " + textC)}
-                ${kls > 2 ? `<br>${f("d. " + textD)}` : ''}
-            </div>`;
+        // Opsi Menurun (Jika Sangat Panjang)
+        if (isLong) {
+            return `<table style="border:none; margin-top:0pt; margin-left:5pt;">
+                <tr><td style="padding:0; line-height:100%;">${f("a. " + textA)}</td></tr>
+                <tr><td style="padding:0; line-height:100%;">${f("b. " + textB)}</td></tr>
+                <tr><td style="padding:0; line-height:100%;">${f("c. " + textC)}</td></tr>
+                ${kls > 2 ? `<tr><td style="padding:0; line-height:100%;">${f("d. " + textD)}</td></tr>` : ''}
+            </table>`;
         }
 
-        if (kls > 2) { // Kelas 3-6: 2 Kiri, 2 Kanan
+        // Kelas Atas (2 Kiri, 2 Kanan)
+        if (kls > 2) {
             return `
-                <table style="width:100%; border:none; ${wrapperStyle}">
+                <table style="width:100%; border:none; border-collapse:collapse; margin-top:1pt; margin-left:5pt;">
                     <tr>
-                        <td style="width:50%; padding:0;">${f("a. " + textA)}</td>
-                        <td style="width:50%; padding:0;">${f("c. " + textC)}</td>
+                        <td style="width:50%; padding:0; line-height:100%;">${f("a. " + textA)}</td>
+                        <td style="width:50%; padding:0; line-height:100%;">${f("c. " + textC)}</td>
                     </tr>
                     <tr>
-                        <td style="width:50%; padding:0;">${f("b. " + textB)}</td>
-                        <td style="width:50%; padding:0;">${f("d. " + textD)}</td>
+                        <td style="width:50%; padding:0; line-height:100%;">${f("b. " + textB)}</td>
+                        <td style="width:50%; padding:0; line-height:100%;">${f("d. " + textD)}</td>
                     </tr>
                 </table>`;
-        } else { // Kelas 1-2: Sejajar Renggang
-            return `<div style="${wrapperStyle}">
-                ${f("a. " + textA)} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-                ${f("b. " + textB)} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-                ${f("c. " + textC)}
+        } else {
+            // Kelas Rendah (Sejajar Rapat)
+            return `<div style="margin-top:1pt; margin-left:5pt;">
+                ${f("a. " + textA)} &nbsp;&nbsp;&nbsp; ${f("b. " + textB)} &nbsp;&nbsp;&nbsp; ${f("c. " + textC)}
             </div>`;
         }
     };
 
     const renderSoalWord = (s, i) => `
-        <table style="width:100%; border:none; margin-bottom:4pt;">
+        <table style="width:100%; border:none; margin-bottom:3pt; border-collapse:collapse;">
             <tr>
-                <td style="width:22pt; vertical-align:top; padding:0;">${f(i + ".", true)}</td>
-                <td style="vertical-align:top; padding:0; text-align:justify; line-height:13pt;">
-                    ${s.imgS ? `<img src="${s.imgS}" width="140"><br>` : ''}
+                <td style="width:22pt; vertical-align:top; padding:0; border:none;">${f(i + ".", true)}</td>
+                <td style="vertical-align:top; padding:0; border:none; text-align:justify; mso-line-height-rule:exactly; line-height:13pt;">
+                    ${s.imgS ? `<img src="${s.imgS}" width="130" style="margin-bottom:2pt;"><br>` : ''}
                     ${f(s.tanya)}
                     ${renderOpsiWord(s)}
                 </td>
@@ -616,7 +617,7 @@
         const esai = allSoal.filter(x => x.bentuk === 'Esai');
 
         let bodyContent = pg.map((s, i) => renderSoalWord(s, i + 1)).join('');
-        bodyContent += `<p style="margin-top:10pt;">${f("II. Isilah titik-titik di bawah ini dengan benar!", true)}</p>`;
+        bodyContent += `<p style="margin-top:8pt; margin-bottom:4pt;">${f("II. Isilah titik-titik di bawah ini dengan benar!", true)}</p>`;
         bodyContent += esai.map((s, i) => renderSoalWord(s, pg.length + i + 1)).join('');
 
         const fullHtml = `
@@ -624,14 +625,14 @@
             <head>
                 <meta charset="utf-8">
                 <style>
-                    p, div, td { margin:0; padding:0; font-family:'${fontType}'; }
+                    body, p, div, td, span { margin:0; padding:0; font-family:'${fontType}'; line-height:100%; }
                 </style>
             </head>
             <body>
                 ${kopWord}
                 ${identitasHTML}
                 <div style="border:1pt solid black; padding:2pt; text-align:center; margin-bottom:8pt;">
-                    ${f("Berilah tanda silang (X) pada huruf a, b, c atau d untuk jawaban yang paling benar!", true)}
+                    ${f("Pilihlah salah satu jawaban yang paling tepat dengan tanda silang (X)!", true)}
                 </div>
                 ${bodyContent}
             </body>
@@ -659,6 +660,7 @@
 </script>
 </body>
 </html>
+
 
 
 
