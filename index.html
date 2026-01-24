@@ -520,7 +520,10 @@
         const fontType = kls <= 2 ? 'Arial' : 'Times New Roman';
         const logoSrc = document.getElementById('p-logo').src;
 
-        // KOP dengan Logo Super Kecil (35pt) dan Spasi Sangat Rapat
+        // Gaya pemisah halaman khusus untuk Microsoft Word
+        const pageBreak = '<br clear="all" style="mso-special-character:line-break; page-break-before:always">';
+
+        // KOP Tabel Rapat & Logo Kecil (35pt)
         const kopWord = `
             <table style="width: 100%; border: none; border-bottom: 1.5pt solid black; margin-bottom: 2pt;">
                 <tr>
@@ -528,40 +531,46 @@
                         <img src="${logoSrc}" style="width: 35pt; height: auto;">
                     </td>
                     <td style="text-align: center; border: none; vertical-align: middle; padding: 0;">
-                        <h4 style="margin: 0; text-transform: uppercase; font-size: 11pt; font-family: '${fontType}'; line-height: 1.0;">SUMATIF TENGAH SEMESTER (STS)</h4>
-                        <h4 style="margin: 0; text-transform: uppercase; font-size: 11pt; font-family: '${fontType}'; line-height: 1.0;">SEMESTER 2 SEKOLAH DASAR</h4>
-                        <p style="margin: 0; font-size: 10pt; font-family: '${fontType}'; line-height: 1.0;">TAHUN AJARAN 2025/2026</p>
+                        <h4 style="margin: 0; text-transform: uppercase; font-size: 11pt; font-family: '${fontType}';">SUMATIF TENGAH SEMESTER (STS)</h4>
+                        <h4 style="margin: 0; text-transform: uppercase; font-size: 11pt; font-family: '${fontType}';">SEMESTER 2 SEKOLAH DASAR</h4>
+                        <p style="margin: 0; font-size: 10pt; font-family: '${fontType}';">TAHUN AJARAN 2025/2026</p>
                     </td>
                     <td style="width: 40pt; border: none; padding: 0;"></td>
                 </tr>
             </table>
         `;
 
-        // Ambil isi dari engine cetak
-        let content = document.getElementById('f-engine').innerHTML;
-        
-        // Ganti KOP Div dengan KOP Tabel Rapat
-        content = content.replace(/<div class="kop">[\s\S]*?<\/div>/, kopWord);
+        // Mengambil elemen-elemen secara terpisah untuk disisipkan pemisah halaman
+        const kisiContent = document.querySelector('#p-kisi').closest('.page-section').innerHTML;
+        let naskahContent = document.getElementById('f-engine').innerHTML;
+        const kunciContent = document.querySelector('#p-kunci').closest('.page-section').innerHTML;
+
+        // Ganti KOP pada naskah
+        naskahContent = naskahContent.replace(/<div class="kop">[\s\S]*?<\/div>/, kopWord);
+
+        // Gabungkan dengan penyekat halaman (pageBreak)
+        const finalContent = `
+            <div class="section-kisi">${kisiContent}</div>
+            ${pageBreak}
+            <div class="section-naskah">${naskahContent}</div>
+            ${pageBreak}
+            <div class="section-kunci">${kunciContent}</div>
+        `;
 
         const styles = `<style>
             @page { size: A4; margin: 1cm; }
-            body { font-family: "${fontType}"; font-size: 11pt; line-height: 1.0; color: black; }
-            h3, h4, p { margin: 0; padding: 0; }
-            table { width: 100%; border-collapse: collapse; margin: 0; }
-            /* Tabel identitas tanpa border dan sangat rapat */
-            table[style*="margin-bottom:15px"] { margin-bottom: 5pt !important; }
-            table[style*="margin-bottom:15px"] td { border: none !important; padding: 0pt 2pt !important; font-size: 10pt; }
-            .soal-row { margin-bottom: 3pt; display: block; clear: both; }
-            td { vertical-align: top; border: 0.5pt solid black; padding: 2pt; }
-            img { max-width: 100%; }
-            /* Menghilangkan garis petunjuk silang agar rapat */
-            div[style*="border-top:1px solid black"] { margin-bottom: 5pt !important; padding: 2pt 0 !important; font-size: 10pt; }
+            body { font-family: "${fontType}"; font-size: 11pt; line-height: 1.0; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 5pt; }
+            th, td { border: 0.5pt solid black; padding: 3pt; font-size: 10pt; vertical-align: top; }
+            .soal-row { margin-bottom: 5pt; display: block; clear: both; }
+            /* Menghilangkan border pada tabel identitas siswa */
+            table[style*="border:none"] td { border: none !important; padding: 1pt !important; }
         </style>`;
 
         const fullHtml = `
             <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
             <head><meta charset="utf-8">${styles}</head>
-            <body>${content}</body>
+            <body>${finalContent}</body>
             </html>`;
 
         const converted = htmlDocx.asBlob(fullHtml);
@@ -570,7 +579,6 @@
         link.download = `SOAL_STS_${mapel.replace(/ /g,'_')}_KLS_${kls}.doc`;
         link.click();
     }
-
     function exportData() { db.ref().once('value', s => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(s.val())], {type:'application/json'})); a.download = 'backup_kkg.json'; a.click(); }); }
     function importData(f) { if(f) { const r = new FileReader(); r.onload = e => db.ref().set(JSON.parse(e.target.result)).then(() => location.reload()); r.readAsText(f); } }
     function showTab(id) { document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById('tab-'+id).classList.remove('hidden'); document.querySelector(`[onclick="showTab('${id}')"]`).classList.add('active'); }
@@ -586,6 +594,7 @@
 </script>
 </body>
 </html>
+
 
 
 
