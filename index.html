@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi KKG 2026 - Integrasi Mesin Cetak</title>
+    <title>Bank Soal KKG 2026 - Versi Integrasi Final</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
@@ -21,20 +21,23 @@
         .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
         .card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 5px; }
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
-        .btn { padding: 10px 15px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; color: white; transition: 0.3s; }
+        .btn { padding: 10px 15px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; color: white; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; }
         .btn-blue { background: var(--a); } .btn-green { background: var(--s); } .btn-red { background: var(--d); }
+        .img-pre { max-height: 100px; border-radius: 4px; border: 1px solid #ddd; margin-top: 5px; }
         .hidden { display: none; }
-        #login-page { position: fixed; inset: 0; background: #f1f5f9; z-index: 9999; display: flex; align-items: center; justify-content: center; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: left; }
+        th, td { border: 1px solid #e2e8f0; padding: 12px; text-align: left; font-size: 14px; }
+        th { background: #f8fafc; }
+        #login-page { position: fixed; inset: 0; background: #f1f5f9; z-index: 9999; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
 <div id="login-page">
-    <div class="card" style="width: 350px; text-align: center;">
-        <h2>LOGIN KKG 2026</h2>
+    <div class="card" style="width: 350px;">
+        <h2 style="text-align:center;">MASUK SISTEM KKG</h2>
         <input type="text" id="lUser" placeholder="Username" style="margin-bottom:10px;">
         <input type="password" id="lPass" placeholder="Password" style="margin-bottom:20px;">
         <button class="btn btn-blue" style="width:100%;" onclick="doLogin()">MASUK</button>
@@ -42,73 +45,85 @@
 </div>
 
 <header>
-    <h2 id="header-title">ADMIN BANK SOAL KKG 2026</h2>
+    <h2 id="header-title">SISTEM BANK SOAL KKG 2026</h2>
     <div id="db-st" style="font-size: 10px;">MENGHUBUNGKAN...</div>
 </header>
 
 <div class="nav">
-    <button class="nav-btn active" onclick="showTab('tp')">A. TARGET PEMBELAJARAN</button>
+    <button class="nav-btn active" onclick="showTab('tp')">A. INPUT TUJUAN PEMBELAJARAN</button>
     <button class="nav-btn" onclick="showTab('soal')">B. BANK SOAL</button>
-    <button class="nav-btn" onclick="showTab('unduh')">C. UNDUH DOKUMEN</button>
+    <button class="nav-btn" onclick="showTab('unduh')">C. EKSPOR WORD</button>
 </div>
 
 <div class="container">
     <div class="card">
         <div class="grid">
-            <div><label>Pilih Kelas</label><select id="selKls" onchange="initData()"></select></div>
+            <div><label>Fokus Kelas</label><select id="selKls" onchange="initData()"></select></div>
             <div><label>Mata Pelajaran</label><select id="selMapel" onchange="initData()"></select></div>
         </div>
     </div>
 
     <div id="tab-tp" class="tab-content">
         <div class="card">
-            <input type="text" id="fElemen" placeholder="Nama Elemen (Contoh: Pancasila)">
-            <textarea id="fTp" placeholder="Tujuan Pembelajaran" style="margin: 10px 0;"></textarea>
-            <button class="btn btn-blue" onclick="saveTP()">SIMPAN TP</button>
+            <input type="hidden" id="fIdTp">
+            <div class="grid">
+                <div><label>Elemen</label><input type="text" id="fElemen" placeholder="Contoh: Pancasila"></div>
+                <div><label>Isi TP</label><textarea id="fTp" placeholder="Tujuan Pembelajaran"></textarea></div>
+            </div>
+            <button class="btn btn-blue" style="margin-top:10px;" onclick="saveTP()">SIMPAN TP</button>
         </div>
         <div id="listTP"></div>
     </div>
 
     <div id="tab-soal" class="tab-content hidden">
         <div class="card">
-            <select id="sTP" style="margin-bottom:10px;"><option value="">Pilih TP Terlebih Dahulu</option></select>
-            <select id="sBentuk" onchange="toggleForm()" style="margin-bottom:10px;">
-                <option value="PG">Pilihan Ganda</option>
-                <option value="Esai">Isian Singkat</option>
-            </select>
-            <textarea id="sTanya" placeholder="Pertanyaan Soal" style="margin-bottom:10px;"></textarea>
-            
-            <div id="panelPG">
-                <div class="grid">
-                    <input type="text" id="oa" placeholder="Opsi A">
-                    <input type="text" id="ob" placeholder="Opsi B">
-                    <input type="text" id="oc" placeholder="Opsi C">
-                    <input type="text" id="od" placeholder="Opsi D">
+            <input type="hidden" id="fIdSoal">
+            <div class="grid" style="margin-bottom:15px;">
+                <div><label>Tujuan Pembelajaran (TP)</label><select id="sTP"></select></div>
+                <div><label>Bentuk Soal</label>
+                    <select id="sBentuk" onchange="toggleForm()">
+                        <option value="PG">Pilihan Ganda</option>
+                        <option value="Esai">Isian Singkat</option>
+                    </select>
                 </div>
             </div>
             
+            <label>Butir Soal</label>
+            <textarea id="sTanya" placeholder="Ketikkan isi soal di sini..." style="height:100px; margin-bottom:10px;"></textarea>
+            
+            <div id="panelPG">
+                <div class="grid">
+                    <div><label>Opsi A</label><input type="text" id="oa"></div>
+                    <div><label>Opsi B</label><input type="text" id="ob"></div>
+                    <div><label>Opsi C</label><input type="text" id="oc"></div>
+                    <div><label>Opsi D (Kosongkan kls 1-2)</label><input type="text" id="od"></div>
+                </div>
+            </div>
+
             <div style="margin-top:15px;">
                 <label>Gambar Stimulus (Opsional)</label>
-                <input type="file" id="fImg" accept="image/*" onchange="preImg(this, 'p-img')">
-                <img id="p-img" class="hidden" style="max-height:100px; margin-top:5px;">
+                <input type="file" id="fImgS" accept="image/*" onchange="preImg(this, 'p-img-s')">
+                <img id="p-img-s" class="img-pre hidden">
             </div>
-            
-            <button class="btn btn-green" onclick="saveSoal()" style="margin-top:15px; width:100%;">SIMPAN KE DATABASE</button>
+
+            <button class="btn btn-green" style="width:100%; margin-top:20px;" onclick="saveSoal()">SIMPAN SOAL KE DATABASE</button>
         </div>
         <div id="listSoal"></div>
     </div>
 
     <div id="tab-unduh" class="tab-content hidden">
         <div class="card" style="text-align: center;">
-            <h3>Ekspor Naskah Soal</h3>
-            <p>Data akan disusun otomatis menjadi file Microsoft Word (.docx) menggunakan standar penulisan naskah ujian.</p>
-            <button class="btn btn-blue" onclick="exportToWord()" style="padding: 15px 30px;">UNDUH FILE WORD (.DOCX)</button>
+            <h3>Generate Naskah Soal</h3>
+            <p>Hasil ekspor akan mengikuti format Microsoft Word standar dengan pengaturan font otomatis (Arial/Times New Roman).</p>
+            <button class="btn btn-blue" onclick="exportToWord()" style="padding: 20px 40px; font-size: 18px;">
+                DOWNLOAD .DOCX
+            </button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- KONFIGURASI DATABASE ---
+    // --- KONFIGURASI FIREBASE ---
     const firebaseConfig = {
         apiKey: "AIzaSyBA3VSLrRL6d9y0HdQM-H0Y7z2VisMHl_I",
         authDomain: "kkgmajalengka2026.firebaseapp.com",
@@ -118,25 +133,92 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // --- LOGIKA LOGIN (index 28) ---
+    // --- SISTEM LOGIN & ROLE ---
+    let currentUser = {};
     function doLogin() {
-        const u = document.getElementById('lUser').value;
+        const u = document.getElementById('lUser').value.toLowerCase();
         const p = document.getElementById('lPass').value;
-        if(u === 'admin' && p === 'admin123') {
+        const creds = {
+            'admin': 'admin123', 'guru1': 'guru123', 'guru2': 'guru123', 
+            'guru3': 'guru123', 'guru4': 'guru123', 'guru5': 'guru123', 'guru6': 'guru123'
+        };
+
+        if(creds[u] && creds[u] === p) {
+            currentUser = { name: u, role: (u==='admin'?'admin':'guru'), kls: u.replace('guru','') };
             document.getElementById('login-page').style.display = 'none';
-            setupFilters();
-        } else { alert("User/Pass Salah!"); }
+            setupUI();
+        } else { alert("Login gagal!"); }
     }
 
-    function setupFilters() {
+    function setupUI() {
         const kls = document.getElementById('selKls');
-        for(let i=1; i<=6; i++) kls.innerHTML += `<option value="${i}">Kelas ${i}</option>`;
         const mpls = ["Pendidikan Pancasila", "Bahasa Indonesia", "Matematika", "IPAS", "Seni Budaya", "PJOK", "Bahasa Inggris", "PAI"];
+        
+        if(currentUser.role === 'admin') {
+            [1,2,3,4,5,6].forEach(k => kls.innerHTML += `<option value="${k}">Kelas ${k}</option>`);
+        } else {
+            kls.innerHTML = `<option value="${currentUser.kls}">Kelas ${currentUser.kls}</option>`;
+        }
+        
         mpls.forEach(m => document.getElementById('selMapel').innerHTML += `<option value="${m}">${m}</option>`);
         initData();
     }
 
-    // --- LOGIKA MESIN CETAK (DARI INDEX 27) ---
+    // --- MANAJEMEN DATA (CRUD index 28) ---
+    function initData() {
+        const k = document.getElementById('selKls').value;
+        const m = document.getElementById('selMapel').value;
+        
+        // Load TP
+        db.ref('kkg_tp').on('value', snap => {
+            const data = snap.val() ? Object.entries(snap.val()).map(([id, v]) => ({id, ...v})).filter(x => x.k==k && x.m==m) : [];
+            renderTP(data);
+            updateSelectTP(data);
+        });
+
+        // Load Soal
+        db.ref('kkg_soal').on('value', snap => {
+            const data = snap.val() ? Object.entries(snap.val()).map(([id, v]) => ({id, ...v})).filter(x => x.k==k && x.m==m) : [];
+            renderSoal(data);
+        });
+    }
+
+    function saveTP() {
+        const id = document.getElementById('fIdTp').value || db.ref('kkg_tp').push().key;
+        const data = {
+            k: document.getElementById('selKls').value,
+            m: document.getElementById('selMapel').value,
+            e: document.getElementById('fElemen').value,
+            tp: document.getElementById('fTp').value
+        };
+        db.ref('kkg_tp/' + id).set(data).then(() => {
+            document.getElementById('fIdTp').value = "";
+            document.getElementById('fElemen').value = "";
+            document.getElementById('fTp').value = "";
+        });
+    }
+
+    function saveSoal() {
+        const id = document.getElementById('fIdSoal').value || db.ref('kkg_soal').push().key;
+        const data = {
+            k: document.getElementById('selKls').value,
+            m: document.getElementById('selMapel').value,
+            tp_id: document.getElementById('sTP').value,
+            bentuk: document.getElementById('sBentuk').value,
+            tanya: document.getElementById('sTanya').value,
+            oa: document.getElementById('oa').value,
+            ob: document.getElementById('ob').value,
+            oc: document.getElementById('oc').value,
+            od: document.getElementById('od').value,
+            imgS: document.getElementById('p-img-s').src.startsWith('data') ? document.getElementById('p-img-s').src : null
+        };
+        db.ref('kkg_soal/' + id).set(data).then(() => {
+            resetSoal();
+            alert("Berhasil disimpan!");
+        });
+    }
+
+    // --- MESIN CETAK WORD (LOGIKA index 27) ---
     async function exportToWord() {
         const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, BorderStyle, ImageRun } = docx;
         const kls = document.getElementById('selKls').value;
@@ -144,80 +226,67 @@
         const fontName = kls <= 2 ? "Arial" : "Times New Roman";
 
         const snap = await db.ref('kkg_soal').once('value');
-        const raw = snap.val() ? Object.values(snap.val()).filter(x => x.k == kls && x.m == mapel) : [];
-        if(raw.length === 0) return alert("Data kosong!");
+        const all = snap.val() ? Object.values(snap.val()).filter(x => x.k == kls && x.m == mapel) : [];
+        
+        if(all.length === 0) return alert("Tidak ada data untuk dicetak!");
 
         const children = [];
 
-        // Kop Header
+        // KOP DINAMIS
         children.push(new Paragraph({
             alignment: AlignmentType.CENTER,
             children: [
-                new TextRun({ text: "SUMATIF TENGAH SEMESTER (STS) SEMESTER 2", bold: true, size: 28, font: fontName }),
-                new TextRun({ text: `\nMATA PELAJARAN: ${mapel.toUpperCase()}`, bold: true, size: 24, font: fontName }),
-                new TextRun({ text: `\nTAHUN AJARAN 2025/2026`, size: 20, font: fontName })
+                new TextRun({ text: "SUMATIF TENGAH SEMESTER (STS)", bold: true, size: 28, font: fontName }),
+                new TextRun({ text: "\nSEMESTER 2 SEKOLAH DASAR", bold: true, size: 24, font: fontName }),
+                new TextRun({ text: `\nMATA PELAJARAN: ${mapel.toUpperCase()}`, bold: true, size: 22, font: fontName }),
             ]
         }));
-        children.push(new Paragraph({ text: "", border: { bottom: { color: "auto", space: 1, value: BorderStyle.DOUBLE, size: 6 } }, spacing: { after: 200 } }));
+        children.push(new Paragraph({ text: "", border: { bottom: { color: "auto", space: 1, value: "double", size: 6 } }, spacing: { after: 200 } }));
 
-        // Judul Bagian I
-        children.push(new Paragraph({
-            children: [new TextRun({ text: "I. Berilah tanda silang (x) pada huruf a, b, c, atau d di depan jawaban yang paling benar!", bold: true, font: fontName })],
-            spacing: { before: 200, after: 200 }
-        }));
+        // RENDER SOAL (LOGIKA TABEL INDEX 27)
+        const pg = all.filter(x => x.bentuk === 'PG');
+        children.push(new Paragraph({ children: [new TextRun({ text: "I. Berilah tanda silang (x) pada pilihan jawaban yang paling tepat!", bold: true, font: fontName })], spacing: { after: 200 } }));
 
-        // Render Soal menggunakan Logika Tabel (index 27)
-        raw.forEach((s, idx) => {
-            const rowContent = [];
-            rowContent.push(new Paragraph({
-                children: [new TextRun({ text: s.tanya, font: fontName })],
-                spacing: { after: 100 }
-            }));
+        pg.forEach((s, i) => {
+            const qContent = [];
+            qContent.push(new Paragraph({ children: [new TextRun({ text: s.tanya, font: fontName })], spacing: { after: 100 } }));
 
-            if(s.imgS) {
+            if (s.imgS) {
                 try {
-                    rowContent.push(new Paragraph({
+                    qContent.push(new Paragraph({
                         children: [new ImageRun({
                             data: Uint8Array.from(atob(s.imgS.split(',')[1]), c => c.charCodeAt(0)),
                             transformation: { width: 150, height: 100 }
                         })]
                     }));
-                } catch(e) {}
+                } catch(e) { console.error(e); }
             }
 
-            if(s.bentuk === 'PG') {
-                const labels = ['a', 'b', 'c', 'd'];
-                const opts = [s.oa, s.ob, s.oc, s.od];
-                for(let i=0; i < (kls <= 2 ? 3 : 4); i++) {
-                    rowContent.push(new Paragraph({
-                        indent: { left: 400 },
-                        children: [new TextRun({ text: `${labels[i]}. ${opts[i]}`, font: fontName })]
-                    }));
-                }
-            }
+            const ops = (kls <= 2) ? ['a','b','c'] : ['a','b','c','d'];
+            const vals = [s.oa, s.ob, s.oc, s.od];
+            
+            ops.forEach((o, idx) => {
+                qContent.push(new Paragraph({ indent: { left: 400 }, children: [new TextRun({ text: `${o}. ${vals[idx]}`, font: fontName })] }));
+            });
 
             children.push(new Table({
                 width: { size: 100, type: WidthType.PERCENTAGE },
                 borders: BorderStyle.NONE,
-                rows: [
-                    new TableRow({
-                        children: [
-                            new TableCell({ width: { size: 5, type: WidthType.PERCENTAGE }, borders: BorderStyle.NONE, children: [new Paragraph({ children: [new TextRun({ text: `${idx+1}.`, font: fontName, bold: true })] })] }),
-                            new TableCell({ width: { size: 95, type: WidthType.PERCENTAGE }, borders: BorderStyle.NONE, children: rowContent })
-                        ]
-                    })
-                ]
+                rows: [new TableRow({
+                    children: [
+                        new TableCell({ width: { size: 5, type: WidthType.PERCENTAGE }, borders: BorderStyle.NONE, children: [new Paragraph({ children: [new TextRun({ text: `${i+1}.`, font: fontName, bold: true })] })] }),
+                        new TableCell({ width: { size: 95, type: WidthType.PERCENTAGE }, borders: BorderStyle.NONE, children: qContent })
+                    ]
+                })]
             }));
             children.push(new Paragraph({ text: "", spacing: { after: 100 } }));
         });
 
         const doc = new Document({ sections: [{ children }] });
-        Packer.toBlob(doc).then(blob => {
-            saveAs(blob, `SOAL_${mapel}_KLS${kls}.docx`);
-        });
+        Packer.toBlob(doc).then(blob => saveAs(blob, `SOAL_${mapel}_KLS${kls}.docx`));
     }
 
-    // --- FUNGSI PEMBANTU LAINNYA ---
+    // --- UI HELPER ---
     function showTab(id) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -229,20 +298,42 @@
         document.getElementById('panelPG').style.display = (document.getElementById('sBentuk').value === 'PG') ? 'block' : 'none';
     }
 
-    function preImg(input, targetId) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const img = document.getElementById(targetId);
-                img.src = e.target.result;
-                img.classList.remove('hidden');
-            };
-            reader.readAsDataURL(input.files[0]);
+    function preImg(i, t) {
+        if(i.files[0]){
+            const r = new FileReader();
+            r.onload = e => { const m = document.getElementById(t); m.src = e.target.result; m.classList.remove('hidden'); };
+            r.readAsDataURL(i.files[0]);
         }
     }
 
-    // (Tambahkan fungsi saveTP, saveSoal, initData dsb dari index 28 Anda di sini)
-</script>
+    function resetSoal() {
+        document.getElementById('fIdSoal').value = "";
+        document.getElementById('sTanya').value = "";
+        document.getElementById('oa').value = ""; document.getElementById('ob').value = "";
+        document.getElementById('oc').value = ""; document.getElementById('od').value = "";
+        document.getElementById('p-img-s').src = "";
+        document.getElementById('p-img-s').classList.add('hidden');
+    }
 
+    function renderTP(data) {
+        let h = `<table><tr><th>Elemen</th><th>TP</th><th>Aksi</th></tr>`;
+        data.forEach(x => h += `<tr><td>${x.e}</td><td>${x.tp}</td><td><button onclick="editTP('${x.id}','${x.e}','${x.tp}')">Edit</button></td></tr>`);
+        document.getElementById('listTP').innerHTML = h + `</table>`;
+    }
+
+    function updateSelectTP(data) {
+        let h = `<option value="">Pilih TP</option>`;
+        data.forEach(x => h += `<option value="${x.id}">${x.e} - ${x.tp.substring(0,30)}...</option>`);
+        document.getElementById('sTP').innerHTML = h;
+    }
+
+    function renderSoal(data) {
+        let h = `<table><tr><th>No</th><th>Soal</th><th>Bentuk</th><th>Aksi</th></tr>`;
+        data.forEach((x, i) => h += `<tr><td>${i+1}</td><td>${x.tanya.substring(0,50)}...</td><td>${x.bentuk}</td><td><button onclick="db.ref('kkg_soal/${x.id}').remove()">Hapus</button></td></tr>`);
+        document.getElementById('listSoal').innerHTML = h + `</table>`;
+    }
+
+    db.ref(".info/connected").on("value", s => document.getElementById('db-st').innerText = s.val() ? "● ONLINE" : "○ OFFLINE");
+</script>
 </body>
 </html>
