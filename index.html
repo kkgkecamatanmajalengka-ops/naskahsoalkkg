@@ -514,57 +514,61 @@
         }); 
     }
 
-   function exportToWord() {
-    const mapel = document.getElementById('selMapel').value;
-    const kls = document.getElementById('selKls').value;
-    const fontType = kls <= 2 ? 'Arial' : 'Times New Roman';
-    const logoSrc = document.getElementById('p-logo').src;
+  function exportToWord() {
+        const mapel = document.getElementById('selMapel').value;
+        const kls = document.getElementById('selKls').value;
+        const fontType = kls <= 2 ? 'Arial' : 'Times New Roman';
+        const logoSrc = document.getElementById('p-logo').src;
 
-    // Membuat KOP khusus format Word menggunakan Tabel agar rapi
-    const kopWord = `
-        <table style="width: 100%; border: none; border-bottom: 3pt double black; margin-bottom: 10pt;">
-            <tr>
-                <td style="width: 80pt; border: none; vertical-align: middle;">
-                    <img src="${logoSrc}" style="width: 70pt; height: auto;">
-                </td>
-                <td style="text-align: center; border: none; vertical-align: middle;">
-                    <h3 style="margin: 0; padding: 0; text-transform: uppercase; font-size: 14pt;">SUMATIF TENGAH SEMESTER (STS)</h3>
-                    <h3 style="margin: 0; padding: 0; text-transform: uppercase; font-size: 14pt;">SEMESTER 2 SEKOLAH DASAR</h3>
-                    <h3 style="margin: 0; padding: 0; font-size: 12pt;">TAHUN AJARAN 2025/2026</h3>
-                </td>
-                <td style="width: 80pt; border: none;"></td>
-            </tr>
-        </table>
-    `;
+        // 1. KOP dengan Logo Kecil (45pt) dan Spasi Rapat
+        const kopWord = `
+            <table style="width: 100%; border: none; border-bottom: 2pt double black; margin-bottom: 5pt;">
+                <tr>
+                    <td style="width: 50pt; border: none; vertical-align: middle;">
+                        <img src="${logoSrc}" style="width: 45pt; height: auto;">
+                    </td>
+                    <td style="text-align: center; border: none; vertical-align: middle;">
+                        <h4 style="margin: 0; padding: 0; text-transform: uppercase; font-size: 12pt; font-family: '${fontType}';">SUMATIF TENGAH SEMESTER (STS)</h4>
+                        <h4 style="margin: 0; padding: 0; text-transform: uppercase; font-size: 12pt; font-family: '${fontType}';">SEMESTER 2 SEKOLAH DASAR</h4>
+                        <p style="margin: 0; padding: 0; font-size: 11pt; font-family: '${fontType}';">TAHUN AJARAN 2025/2026</p>
+                    </td>
+                    <td style="width: 50pt; border: none;"></td>
+                </tr>
+            </table>
+        `;
 
-    // Mengambil konten naskah dan mengganti KOP aslinya dengan KOP tabel
-    let content = document.getElementById('printArea').innerHTML;
-    // Menghapus KOP asli dari konten cetak agar tidak ganda
-    content = content.replace(/<div class="kop">[\s\S]*?<\/div>/, kopWord);
+        // 2. Mengambil konten naskah
+        let content = document.getElementById('f-engine').innerHTML;
+        
+        // Ganti KOP asli dengan KOP Word yang rapat
+        content = content.replace(/<div class="kop">[\s\S]*?<\/div>/, kopWord);
 
-    const styles = `<style>
-        @page { size: A4; margin: 1.5cm; }
-        body { font-family: "${fontType}"; font-size: 12pt; line-height: 1.2; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 0.5pt solid black; padding: 4pt; font-size: 11pt; }
-        .soal-row { margin-bottom: 10pt; clear: both; }
-        .grid-2-col { width: 100%; }
-        .grid-2-col td { border: none; padding: 2pt; }
-        .img-naskah { max-width: 300pt; display: block; margin: 5pt 0; }
-    </style>`;
+        // 3. CSS Khusus Word untuk merapatkan jarak
+        const styles = `<style>
+            @page { size: A4; margin: 1.2cm; }
+            body { font-family: "${fontType}"; font-size: 11pt; line-height: 1.0; color: black; }
+            h3, h4, p { margin: 0; padding: 0; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 5pt; }
+            /* Identitas Nama/Kelas dibuat rapat */
+            .identitas-table td { border: none !important; padding: 1pt 2pt !important; font-size: 11pt; }
+            .soal-row { margin-bottom: 5pt; display: block; clear: both; }
+            .opsi-container { margin-top: 2pt; }
+            td { vertical-align: top; border: 0.5pt solid black; padding: 3pt; }
+            img { max-width: 100%; }
+        </style>`;
 
-    const fullHtml = `
-        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
-        <head><meta charset="utf-8">${styles}</head>
-        <body>${content}</body>
-        </html>`;
+        const fullHtml = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+            <head><meta charset="utf-8">${styles}</head>
+            <body>${content}</body>
+            </html>`;
 
-    const converted = htmlDocx.asBlob(fullHtml);
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(converted);
-    link.download = `SOAL_STS_${mapel.replace(/ /g,'_')}_KLS_${kls}.doc`;
-    link.click();
-}
+        const converted = htmlDocx.asBlob(fullHtml);
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(converted);
+        link.download = `SOAL_STS_${mapel.replace(/ /g,'_')}_KLS_${kls}.doc`;
+        link.click();
+    }
 
     function exportData() { db.ref().once('value', s => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(s.val())], {type:'application/json'})); a.download = 'backup_kkg.json'; a.click(); }); }
     function importData(f) { if(f) { const r = new FileReader(); r.onload = e => db.ref().set(JSON.parse(e.target.result)).then(() => location.reload()); r.readAsText(f); } }
@@ -581,4 +585,5 @@
 </script>
 </body>
 </html>
+
 
