@@ -520,79 +520,77 @@
     const fontType = kls <= 2 ? 'Arial' : 'Times New Roman';
     const logoSrc = document.getElementById('p-logo').src;
 
-    const pageBreak = '<br clear="all" style="mso-special-character:line-break; page-break-before:always">';
-
-    // KOP dengan Logo Sangat Kecil dan Teks Rapat
+    // KOP Word (Logo mikro 20pt, teks rapat)
     const kopWord = `
-        <table style="width: 100%; border: none; border-bottom: 1.5pt solid black; margin-bottom: 4pt;">
+        <table style="width: 100%; border: none; border-bottom: 1.5pt solid black; margin-bottom: 2pt;">
             <tr>
-                <td style="width: 30pt; border: none; vertical-align: middle; padding: 0;">
-                    <img src="${logoSrc}" style="width: 25pt; height: auto;">
+                <td style="width: 25pt; border: none; vertical-align: middle; padding: 0;">
+                    <img src="${logoSrc}" style="width: 20pt; height: auto;">
                 </td>
                 <td style="text-align: center; border: none; vertical-align: middle; padding: 0;">
-                    <h4 style="margin: 0; text-transform: uppercase; font-size: 11pt; font-family: '${fontType}'; line-height: 1.0;">SUMATIF TENGAH SEMESTER (STS)</h4>
-                    <h4 style="margin: 0; text-transform: uppercase; font-size: 11pt; font-family: '${fontType}'; line-height: 1.0;">SEMESTER 2 SEKOLAH DASAR</h4>
+                    <h4 style="margin: 0; text-transform: uppercase; font-size: 11pt; font-family: '${fontType}'; line-height: 100%;">SUMATIF TENGAH SEMESTER (STS)</h4>
+                    <h4 style="margin: 0; text-transform: uppercase; font-size: 11pt; font-family: '${fontType}'; line-height: 100%;">SEMESTER 2 SEKOLAH DASAR</h4>
                     <p style="margin: 0; font-size: 10pt; font-family: '${fontType}';">TAHUN AJARAN 2025/2026</p>
                 </td>
-                <td style="width: 30pt; border: none; padding: 0;"></td>
+                <td style="width: 25pt; border: none; padding: 0;"></td>
             </tr>
         </table>
     `;
 
-    // Identitas Siswa Sangat Rapat
+    // Identitas Rapat (Arial/TNR 12pt Bold)
     const identitasHTML = `
-        <table style="width:100%; border:none; margin-bottom:8pt; font-family:'${fontType}'; font-size:12pt; font-weight:bold;">
-            <tr>
-                <td style="border:none; width:20%; padding:0;">Mata Pelajaran</td>
-                <td style="border:none; width:40%; padding:0;">: ${mapel}</td>
-                <td style="border:none; width:12%; padding:0;">Nama</td>
-                <td style="border:none; padding:0;">: ...........................</td>
+        <table style="width:100%; border:none; margin-bottom:5pt; font-family:'${fontType}'; font-size:12pt;">
+            <tr style="font-weight:bold;">
+                <td style="border:none; width:20%; padding:0; mso-line-height-rule:exactly; line-height:12pt;">Mata Pelajaran</td>
+                <td style="border:none; width:40%; padding:0; mso-line-height-rule:exactly; line-height:12pt;">: ${mapel}</td>
+                <td style="border:none; width:12%; padding:0; mso-line-height-rule:exactly; line-height:12pt;">Nama</td>
+                <td style="border:none; padding:0; mso-line-height-rule:exactly; line-height:12pt;">: ...........................</td>
             </tr>
-            <tr>
-                <td style="border:none; padding:0;">Kelas</td>
-                <td style="border:none; padding:0;">: ${kls} (${kls <= 2 ? (kls == 1 ? 'Satu' : 'Dua') : (kls == 3 ? 'Tiga' : kls == 4 ? 'Empat' : kls == 5 ? 'Lima' : 'Enam')})</td>
-                <td style="border:none; padding:0;">Nomor</td>
-                <td style="border:none; padding:0;">: ...........................</td>
+            <tr style="font-weight:bold;">
+                <td style="border:none; padding:0; mso-line-height-rule:exactly; line-height:12pt;">Kelas</td>
+                <td style="border:none; padding:0; mso-line-height-rule:exactly; line-height:12pt;">: ${kls} (${kls <= 2 ? (kls == 1 ? 'Satu' : 'Dua') : (kls == 3 ? 'Tiga' : kls == 4 ? 'Empat' : kls == 5 ? 'Lima' : 'Enam')})</td>
+                <td style="border:none; padding:0; mso-line-height-rule:exactly; line-height:12pt;">Nomor</td>
+                <td style="border:none; padding:0; mso-line-height-rule:exactly; line-height:12pt;">: ...........................</td>
             </tr>
         </table>
     `;
 
-    // Pengolahan Soal agar sejajar dengan nomor (Menggunakan tabel transparan)
     const renderSoalWord = (s, i) => {
         return `
-            <table style="width:100%; border:none; margin-bottom:4pt; border-collapse:collapse;">
+            <table style="width:100%; border:none; margin-bottom:2pt; border-collapse:collapse; font-family:'${fontType}'; font-size:12pt;">
                 <tr>
-                    <td style="border:none; width:20pt; vertical-align:top; padding:0; font-size:12pt; font-weight:bold;">${i}.</td>
-                    <td style="border:none; vertical-align:top; padding:0; font-size:12pt; text-align:justify;">
-                        ${s.imgS ? `<img src="${s.imgS}" style="max-height:120px;"><br>` : ''}
+                    <td style="border:none; width:22pt; vertical-align:top; padding:0; font-weight:bold; mso-line-height-rule:exactly; line-height:13pt;">${i}.</td>
+                    <td style="border:none; vertical-align:top; padding:0; text-align:justify; mso-line-height-rule:exactly; line-height:13pt;">
+                        ${s.imgS ? `<img src="${s.imgS}" style="max-height:100px; margin-bottom:2pt;"><br>` : ''}
                         ${s.tanya}
-                        <div style="margin-top:2pt;">${renderOpsiWord(s)}</div>
+                        <div style="margin-top:2pt; font-family:'${fontType}';">${renderOpsiWord(s, fontType, kls)}</div>
                     </td>
                 </tr>
             </table>
         `;
     };
 
-    // Fungsi pembantu opsi (menyesuaikan gaya naskah asli)
-    const renderOpsiWord = (s) => {
+    const renderOpsiWord = (s, font, kls) => {
         const avgChar = (s.oa + s.ob + s.oc + (s.od || "")).length / (kls <= 2 ? 3 : 4);
-        const isStack = avgChar > 25;
-        
-        if (isStack) {
-            return `a. ${s.oa}<br>b. ${s.ob}<br>c. ${s.oc}${kls > 2 ? `<br>d. ${s.od}` : ''}`;
+        if (avgChar > 25 || s.imgOA) {
+            return `<table style="border:none; font-family:'${font}'; font-size:12pt;">
+                <tr><td style="border:none; padding:0;">a. ${s.oa}</td></tr>
+                <tr><td style="border:none; padding:0;">b. ${s.ob}</td></tr>
+                <tr><td style="border:none; padding:0;">c. ${s.oc}</td></tr>
+                ${kls > 2 ? `<tr><td style="border:none; padding:0;">d. ${s.od}</td></tr>` : ''}
+            </table>`;
         } else {
-            return `a. ${s.oa} &nbsp;&nbsp; b. ${s.ob} &nbsp;&nbsp; c. ${s.oc}${kls > 2 ? ` &nbsp;&nbsp; d. ${s.od}` : ''}`;
+            return `a. ${s.oa} &nbsp;&nbsp;&nbsp; b. ${s.ob} &nbsp;&nbsp;&nbsp; c. ${s.oc} ${kls > 2 ? `&nbsp;&nbsp;&nbsp; d. ${s.od}` : ''}`;
         }
     };
 
-    // Eksekusi Render Soal
     db.ref('kkg_soal').once('value', snap => {
         const allSoal = snap.val() ? Object.values(snap.val()).filter(x => x.k == kls && x.m == mapel) : [];
         const pg = allSoal.filter(x => x.bentuk === 'PG');
         const esai = allSoal.filter(x => x.bentuk === 'Esai');
 
         let naskahBody = pg.map((s, i) => renderSoalWord(s, i + 1)).join('');
-        naskahBody += `<p style="font-weight:bold; margin:10pt 0 5pt 0;">Isilah titik-titik di bawah ini dengan benar!</p>`;
+        naskahBody += `<p style="font-weight:bold; margin:8pt 0 2pt 0; font-family:'${fontType}'; font-size:12pt;">Isilah titik-titik di bawah ini dengan benar!</p>`;
         naskahBody += esai.map((s, i) => renderSoalWord(s, pg.length + i + 1)).join('');
 
         const fullHtml = `
@@ -600,15 +598,20 @@
             <head>
                 <meta charset="utf-8">
                 <style>
+                    p, div, td, span {
+                        font-family: "${fontType}", serif;
+                        font-size: 12pt;
+                        margin: 0;
+                        mso-line-height-rule: exactly;
+                        line-height: 13pt;
+                    }
                     @page { size: A4; margin: 1cm 1.5cm; }
-                    body { font-family: "${fontType}"; font-size: 12pt; line-height: 1.0; }
-                    table td { line-height: 1.0; }
                 </style>
             </head>
             <body>
                 ${kopWord}
                 ${identitasHTML}
-                <div style="border-top:1px solid black; border-bottom:1px solid black; padding:2px 0; margin-bottom:8pt; font-weight:bold; font-size:10pt; text-align:center;">
+                <div style="border-top:1pt solid black; border-bottom:1pt solid black; padding:1px 0; margin-bottom:5pt; font-weight:bold; font-size:10pt; text-align:center; font-family:'${fontType}';">
                     Berilah tanda silang (X) pada huruf a, b, c atau d untuk jawaban yang paling benar!
                 </div>
                 ${naskahBody}
@@ -618,7 +621,7 @@
         const converted = htmlDocx.asBlob(fullHtml);
         const link = document.createElement('a');
         link.href = URL.createObjectURL(converted);
-        link.download = `SOAL_STS_KLS_${kls}_${mapel}.doc`;
+        link.download = `SOAL_STS_${mapel}_KLS${kls}.doc`;
         link.click();
     });
 }
@@ -637,6 +640,7 @@
 </script>
 </body>
 </html>
+
 
 
 
