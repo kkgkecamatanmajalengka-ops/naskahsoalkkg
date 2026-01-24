@@ -515,27 +515,26 @@
         }); 
     }
 
-  window.exportWord = function(mode) {
+  {window.exportToWord = function() {
+    // Pastikan library docx tersedia
     const { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, AlignmentType, VerticalAlign } = docx;
-    const sections = []; 
-    const filterVal = document.getElementById('selKls').value; // Mengambil dari filter kelas
+    
+    const filterVal = document.getElementById('selKls').value; 
     const mapel = document.getElementById('selMapel').value;
     
-    // Ambil data soal dari Firebase/Database Anda
     db.ref('kkg_soal').once('value', snap => {
         const allData = snap.val() ? Object.values(snap.val()) : [];
         const dataToExport = allData.filter(x => x.k == filterVal && x.m == mapel);
 
         if(dataToExport.length === 0) return alert("Data Soal Tidak Ditemukan!");
 
-        // Aturan Font & Ukuran
-        const isKecil = (filterVal <= 2);
+        const isKecil = (parseInt(filterVal) <= 2);
         const fontName = isKecil ? "Arial" : "Times New Roman";
-        const fontSize = 24; // 24 di docx.js sama dengan 12pt
+        const fontSize = 24; // 12pt
 
         const children = [];
 
-        // 1. KOP SURAT (Dibuat sangat rapat)
+        // 1. KOP SURAT
         const savedLogo = document.getElementById('p-logo').src;
         let headerCells = [];
         
@@ -551,7 +550,8 @@
                         })], 
                         alignment: AlignmentType.CENTER 
                     })],
-                    verticalAlign: VerticalAlign.CENTER
+                    verticalAlign: VerticalAlign.CENTER,
+                    borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE }
                 }));
             } catch(e) {}
         }
@@ -563,53 +563,45 @@
                 new Paragraph({ children: [new TextRun({ text: "SEMESTER 2 SEKOLAH DASAR", bold: true, size: 22, font: fontName })], alignment: AlignmentType.CENTER }),
                 new Paragraph({ children: [new TextRun({ text: "TAHUN PELAJARAN 2025/2026", size: 20, font: fontName })], alignment: AlignmentType.CENTER })
             ],
-            verticalAlign: VerticalAlign.CENTER
+            verticalAlign: VerticalAlign.CENTER,
+            borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE }
         }));
 
         children.push(new Table({ 
             rows: [new TableRow({ children: headerCells })], 
             width: { size: 100, type: WidthType.PERCENTAGE }, 
-            borders: { 
-                top: {style: BorderStyle.NONE}, bottom: {style: BorderStyle.DOUBLE, size: 3}, 
-                left: {style: BorderStyle.NONE}, right: {style: BorderStyle.NONE}, 
-                insideHorizontal: {style: BorderStyle.NONE}, insideVertical: {style: BorderStyle.NONE} 
-            } 
+            borders: { bottom: {style: BorderStyle.DOUBLE, size: 3}, top: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE, insideHorizontal: BorderStyle.NONE, insideVertical: BorderStyle.NONE } 
         }));
 
-        // 2. IDENTITAS (Sangat Rapat)
-        const idTable = new Table({
+        // 2. IDENTITAS
+        children.push(new Paragraph({ text: "", spacing: { before: 100 } }));
+        children.push(new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
             borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE, insideHorizontal: BorderStyle.NONE, insideVertical: BorderStyle.NONE },
             rows: [
-                new TableRow({
-                    children: [
-                        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Mata Pelajaran : " + mapel, bold: true, font: fontName, size: 22 })] })] }),
-                        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Nama : ...........................", bold: true, font: fontName, size: 22 })] })] })
-                    ]
-                }),
-                new TableRow({
-                    children: [
-                        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Kelas : " + filterVal, bold: true, font: fontName, size: 22 })] })] }),
-                        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Nomor : ...........................", bold: true, font: fontName, size: 22 })] })] })
-                    ]
-                })
+                new TableRow({ children: [
+                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Mata Pelajaran : " + mapel, bold: true, font: fontName, size: 22 })] })] }),
+                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Nama : ...........................", bold: true, font: fontName, size: 22 })] })] })
+                ]}),
+                new TableRow({ children: [
+                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Kelas : " + filterVal, bold: true, font: fontName, size: 22 })] })] }),
+                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Nomor : ...........................", bold: true, font: fontName, size: 22 })] })] })
+                ]})
             ]
-        });
-        children.push(idTable);
-        children.push(new Paragraph({ text: "", spacing: { after: 100 } }));
+        }));
 
         // 3. INSTRUKSI
         children.push(new Paragraph({ 
             children: [new TextRun({ text: "I. Berilah tanda silang (X) pada huruf a, b, c atau d untuk jawaban yang paling benar!", bold: true, font: fontName, size: 20 })],
-            border: { bottom: { color: "auto", space: 1, style: BorderStyle.SINGLE, size: 6 }, top: { color: "auto", space: 1, style: BorderStyle.SINGLE, size: 6 } },
-            spacing: { before: 100, after: 150 }
+            spacing: { before: 200, after: 150 },
+            border: { top: { style: BorderStyle.SINGLE, size: 6 }, bottom: { style: BorderStyle.SINGLE, size: 6 } }
         }));
 
         // 4. LOOPING SOAL
         dataToExport.forEach((s, idx) => {
             const qContent = [];
             
-            // Gambar Soal jika ada
+            // Gambar Soal
             if(s.imgS) {
                 try {
                     qContent.push(new Paragraph({ 
@@ -618,28 +610,19 @@
                     }));
                 } catch(e){}
             }
+            
+            // Teks Pertanyaan
+            qContent.push(new Paragraph({ children: [new TextRun({ text: s.tanya, font: fontName, size: fontSize })], alignment: AlignmentType.JUSTIFIED, spacing: { after: 50 } }));
 
-            // Teks Soal
-            qContent.push(new Paragraph({ 
-                children: [new TextRun({ text: s.tanya, font: fontName, size: fontSize })],
-                alignment: AlignmentType.JUSTIFIED,
-                spacing: { after: 50 }
-            }));
-
-            // OPSI JAWABAN
             const ops = [ {l:'a', t:s.oa}, {l:'b', t:s.ob}, {l:'c', t:s.oc}, {l:'d', t:s.od} ];
             const validOps = isKecil ? ops.slice(0,3) : ops;
-            
-            // Cek Panjang Teks Opsi
             const isLong = validOps.some(o => o.t && o.t.length > 25);
 
             if (isLong) {
-                // Opsi Menurun (Rapat)
-                validOps.forEach(o => {
-                    qContent.push(new Paragraph({ children: [new TextRun({ text: `${o.l}. ${o.t}`, font: fontName, size: fontSize })], spacing: { after: 20 } }));
-                });
+                // Pilihan menurun jika teks panjang
+                validOps.forEach(o => { qContent.push(new Paragraph({ children: [new TextRun({ text: `${o.l}. ${o.t}`, font: fontName, size: fontSize })], spacing: { after: 10 } })); });
             } else if (!isKecil) {
-                // Kelas Atas (2 Kiri - 2 Kanan)
+                // Format 2 Kolom untuk Kelas Tinggi
                 qContent.push(new Table({
                     width: { size: 100, type: WidthType.PERCENTAGE },
                     borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE, insideHorizontal: BorderStyle.NONE, insideVertical: BorderStyle.NONE },
@@ -655,41 +638,29 @@
                     ]
                 }));
             } else {
-                // Kelas Rendah (Sejajar)
+                // Sejajar untuk Kelas Rendah
                 let textOps = validOps.map(o => `${o.l}. ${o.t}`).join("      ");
                 qContent.push(new Paragraph({ children: [new TextRun({ text: textOps, font: fontName, size: fontSize })] }));
             }
 
-            // Gabungkan No dan Isi Soal
+            // Gabungkan No dan Isi
             children.push(new Table({
                 width: { size: 100, type: WidthType.PERCENTAGE },
                 borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE, insideHorizontal: BorderStyle.NONE, insideVertical: BorderStyle.NONE },
-                rows: [
-                    new TableRow({
-                        children: [
-                            new TableCell({ width: { size: 5, type: WidthType.PERCENTAGE }, children: [new Paragraph({ children: [new TextRun({ text: (idx + 1) + ".", bold: true, font: fontName, size: fontSize })] })] }),
-                            new TableCell({ width: { size: 95, type: WidthType.PERCENTAGE }, children: qContent })
-                        ]
-                    })
-                ]
+                rows: [new TableRow({ children: [
+                    new TableCell({ width: { size: 5, type: WidthType.PERCENTAGE }, children: [new Paragraph({ children: [new TextRun({ text: (idx + 1) + ".", bold: true, font: fontName, size: fontSize })] })] }),
+                    new TableCell({ width: { size: 95, type: WidthType.PERCENTAGE }, children: qContent })
+                ]})]
             }));
-            
-            // Spasi antar nomor soal
             children.push(new Paragraph({ text: "", spacing: { after: 80 } }));
         });
 
-        // 5. PACKING DOKUMEN
-        sections.push({ 
-            properties: { page: { margin: { top: 720, right: 720, bottom: 720, left: 720 } } }, 
-            children: children 
-        });
-
-        const doc = new Document({ sections });
+        // 5. GENERATE FILE
+        const doc = new Document({ sections: [{ properties: { page: { margin: { top: 720, right: 720, bottom: 720, left: 720 } } }, children }] });
+        
+        // GUNAKAN METODE INI AGAR PASTI TERDOWNLOAD
         Packer.toBlob(doc).then(blob => {
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `SOAL_STS_${mapel}_KLS${filterVal}.docx`;
-            link.click();
+            saveAs(blob, `SOAL_STS_${mapel}_KLS${filterVal}.docx`);
         });
     });
 };
@@ -708,6 +679,7 @@
 </script>
 </body>
 </html>
+
 
 
 
