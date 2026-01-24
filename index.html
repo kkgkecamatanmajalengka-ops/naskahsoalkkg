@@ -515,162 +515,82 @@
         }); 
     }
 
-  {window.exportToWord = function() {
-    // Pastikan library docx tersedia
-    const { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, AlignmentType, VerticalAlign } = docx;
-    
-    const filterVal = document.getElementById('selKls').value; 
-    const mapel = document.getElementById('selMapel').value;
-    
-    db.ref('kkg_soal').once('value', snap => {
-        const allData = snap.val() ? Object.values(snap.val()) : [];
-        const dataToExport = allData.filter(x => x.k == filterVal && x.m == mapel);
-
-        if(dataToExport.length === 0) return alert("Data Soal Tidak Ditemukan!");
-
-        const isKecil = (parseInt(filterVal) <= 2);
-        const fontName = isKecil ? "Arial" : "Times New Roman";
-        const fontSize = 24; // 12pt
-
-        const children = [];
-
-        // 1. KOP SURAT
-        const savedLogo = document.getElementById('p-logo').src;
-        let headerCells = [];
+  // --- FUNGSI EXPORT KE WORD ---
+    window.exportToWord = function() {
+        const { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle, AlignmentType, VerticalAlign } = docx;
+        const filterVal = document.getElementById('selKls').value; 
+        const mapel = document.getElementById('selMapel').value;
         
-        if (savedLogo && savedLogo.startsWith('data')) {
-            try {
-                const base64Data = savedLogo.split(',')[1];
-                headerCells.push(new TableCell({ 
-                    width: { size: 10, type: WidthType.PERCENTAGE }, 
-                    children: [new Paragraph({ 
-                        children: [new ImageRun({ 
-                            data: Uint8Array.from(atob(base64Data), c => c.charCodeAt(0)), 
-                            transformation: { width: 55, height: 55 } 
-                        })], 
-                        alignment: AlignmentType.CENTER 
-                    })],
-                    verticalAlign: VerticalAlign.CENTER,
-                    borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE }
-                }));
-            } catch(e) {}
-        }
+        db.ref('kkg_soal').once('value', snap => {
+            const allData = snap.val() ? Object.values(snap.val()) : [];
+            const dataToExport = allData.filter(x => x.k == filterVal && x.m == mapel);
 
-        headerCells.push(new TableCell({
-            width: { size: 90, type: WidthType.PERCENTAGE },
-            children: [
-                new Paragraph({ children: [new TextRun({ text: "SUMATIF TENGAH SEMESTER (STS)", bold: true, size: 24, font: fontName })], alignment: AlignmentType.CENTER }),
-                new Paragraph({ children: [new TextRun({ text: "SEMESTER 2 SEKOLAH DASAR", bold: true, size: 22, font: fontName })], alignment: AlignmentType.CENTER }),
-                new Paragraph({ children: [new TextRun({ text: "TAHUN PELAJARAN 2025/2026", size: 20, font: fontName })], alignment: AlignmentType.CENTER })
-            ],
-            verticalAlign: VerticalAlign.CENTER,
-            borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE }
-        }));
+            if(dataToExport.length === 0) return alert("Data Soal Tidak Ditemukan!");
 
-        children.push(new Table({ 
-            rows: [new TableRow({ children: headerCells })], 
-            width: { size: 100, type: WidthType.PERCENTAGE }, 
-            borders: { bottom: {style: BorderStyle.DOUBLE, size: 3}, top: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE, insideHorizontal: BorderStyle.NONE, insideVertical: BorderStyle.NONE } 
-        }));
+            const isKecil = (parseInt(filterVal) <= 2);
+            const fontName = isKecil ? "Arial" : "Times New Roman";
+            const children = [];
 
-        // 2. IDENTITAS
-        children.push(new Paragraph({ text: "", spacing: { before: 100 } }));
-        children.push(new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE, insideHorizontal: BorderStyle.NONE, insideVertical: BorderStyle.NONE },
-            rows: [
-                new TableRow({ children: [
-                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Mata Pelajaran : " + mapel, bold: true, font: fontName, size: 22 })] })] }),
-                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Nama : ...........................", bold: true, font: fontName, size: 22 })] })] })
-                ]}),
-                new TableRow({ children: [
-                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Kelas : " + filterVal, bold: true, font: fontName, size: 22 })] })] }),
-                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Nomor : ...........................", bold: true, font: fontName, size: 22 })] })] })
-                ]})
-            ]
-        }));
-
-        // 3. INSTRUKSI
-        children.push(new Paragraph({ 
-            children: [new TextRun({ text: "I. Berilah tanda silang (X) pada huruf a, b, c atau d untuk jawaban yang paling benar!", bold: true, font: fontName, size: 20 })],
-            spacing: { before: 200, after: 150 },
-            border: { top: { style: BorderStyle.SINGLE, size: 6 }, bottom: { style: BorderStyle.SINGLE, size: 6 } }
-        }));
-
-        // 4. LOOPING SOAL
-        dataToExport.forEach((s, idx) => {
-            const qContent = [];
-            
-            // Gambar Soal
-            if(s.imgS) {
+            // 1. KOP SURAT
+            const savedLogo = document.getElementById('p-logo').src;
+            let headerCells = [];
+            if (savedLogo && savedLogo.startsWith('data')) {
                 try {
-                    qContent.push(new Paragraph({ 
-                        children: [new ImageRun({ data: Uint8Array.from(atob(s.imgS.split(',')[1]), c => c.charCodeAt(0)), transformation: { width: 150, height: 100 } })],
-                        spacing: { after: 50 }
+                    headerCells.push(new TableCell({ 
+                        width: { size: 10, type: WidthType.PERCENTAGE }, 
+                        children: [new Paragraph({ children: [new ImageRun({ data: Uint8Array.from(atob(savedLogo.split(',')[1]), c => c.charCodeAt(0)), transformation: { width: 55, height: 55 } })], alignment: AlignmentType.CENTER })],
+                        borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE }
                     }));
-                } catch(e){}
+                } catch(e) {}
             }
-            
-            // Teks Pertanyaan
-            qContent.push(new Paragraph({ children: [new TextRun({ text: s.tanya, font: fontName, size: fontSize })], alignment: AlignmentType.JUSTIFIED, spacing: { after: 50 } }));
-
-            const ops = [ {l:'a', t:s.oa}, {l:'b', t:s.ob}, {l:'c', t:s.oc}, {l:'d', t:s.od} ];
-            const validOps = isKecil ? ops.slice(0,3) : ops;
-            const isLong = validOps.some(o => o.t && o.t.length > 25);
-
-            if (isLong) {
-                // Pilihan menurun jika teks panjang
-                validOps.forEach(o => { qContent.push(new Paragraph({ children: [new TextRun({ text: `${o.l}. ${o.t}`, font: fontName, size: fontSize })], spacing: { after: 10 } })); });
-            } else if (!isKecil) {
-                // Format 2 Kolom untuk Kelas Tinggi
-                qContent.push(new Table({
-                    width: { size: 100, type: WidthType.PERCENTAGE },
-                    borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE, insideHorizontal: BorderStyle.NONE, insideVertical: BorderStyle.NONE },
-                    rows: [
-                        new TableRow({ children: [
-                            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `a. ${s.oa}`, font: fontName, size: fontSize })] })] }),
-                            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `c. ${s.oc}`, font: fontName, size: fontSize })] })] })
-                        ]}),
-                        new TableRow({ children: [
-                            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `b. ${s.ob}`, font: fontName, size: fontSize })] })] }),
-                            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `d. ${s.od}`, font: fontName, size: fontSize })] })] })
-                        ]})
-                    ]
-                }));
-            } else {
-                // Sejajar untuk Kelas Rendah
-                let textOps = validOps.map(o => `${o.l}. ${o.t}`).join("      ");
-                qContent.push(new Paragraph({ children: [new TextRun({ text: textOps, font: fontName, size: fontSize })] }));
-            }
-
-            // Gabungkan No dan Isi
-            children.push(new Table({
-                width: { size: 100, type: WidthType.PERCENTAGE },
-                borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE, insideHorizontal: BorderStyle.NONE, insideVertical: BorderStyle.NONE },
-                rows: [new TableRow({ children: [
-                    new TableCell({ width: { size: 5, type: WidthType.PERCENTAGE }, children: [new Paragraph({ children: [new TextRun({ text: (idx + 1) + ".", bold: true, font: fontName, size: fontSize })] })] }),
-                    new TableCell({ width: { size: 95, type: WidthType.PERCENTAGE }, children: qContent })
-                ]})]
+            headerCells.push(new TableCell({
+                width: { size: 90, type: WidthType.PERCENTAGE },
+                children: [
+                    new Paragraph({ children: [new TextRun({ text: "SUMATIF TENGAH SEMESTER (STS)", bold: true, size: 24, font: fontName })], alignment: AlignmentType.CENTER }),
+                    new Paragraph({ children: [new TextRun({ text: "TAHUN PELAJARAN 2025/2026", size: 20, font: fontName })], alignment: AlignmentType.CENTER })
+                ],
+                borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE }
             }));
-            children.push(new Paragraph({ text: "", spacing: { after: 80 } }));
-        });
+            children.push(new Table({ rows: [new TableRow({ children: headerCells })], width: { size: 100, type: WidthType.PERCENTAGE }, borders: { bottom: {style: BorderStyle.DOUBLE, size: 3}, top: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE } }));
 
-        // 5. GENERATE FILE
-        const doc = new Document({ sections: [{ properties: { page: { margin: { top: 720, right: 720, bottom: 720, left: 720 } } }, children }] });
-        
-        // GUNAKAN METODE INI AGAR PASTI TERDOWNLOAD
-        Packer.toBlob(doc).then(blob => {
-            saveAs(blob, `SOAL_STS_${mapel}_KLS${filterVal}.docx`);
+            // 2. LOOPING SOAL
+            dataToExport.forEach((s, idx) => {
+                children.push(new Paragraph({ children: [new TextRun({ text: `${idx+1}. ${s.tanya}`, font: fontName, size: 24 })], spacing: { before: 200 } }));
+                if(s.bentuk === 'PG') {
+                    children.push(new Paragraph({ children: [new TextRun({ text: `a. ${s.oa}   b. ${s.ob}   c. ${s.oc}   d. ${s.od}`, font: fontName, size: 24 })] }));
+                }
+            });
+
+            const doc = new Document({ sections: [{ children }] });
+            Packer.toBlob(doc).then(blob => saveAs(blob, `SOAL_STS_KLS${filterVal}.docx`));
         });
-    });
-};
-    function exportData() { db.ref().once('value', s => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(s.val())], {type:'application/json'})); a.download = 'backup_kkg.json'; a.click(); }); }
-    function importData(f) { if(f) { const r = new FileReader(); r.onload = e => db.ref().set(JSON.parse(e.target.result)).then(() => location.reload()); r.readAsText(f); } }
-    function showTab(id) { document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById('tab-'+id).classList.remove('hidden'); document.querySelector(`[onclick="showTab('${id}')"]`).classList.add('active'); }
+    };
+
+    // --- FUNGSI PENDUKUNG (AGAR LOGIN & NAVIGASI JALAN) ---
+    function exportData() {
+        db.ref('kkg_soal').once('value', s => {
+            const b = new Blob([JSON.stringify(s.val(),null,2)], {type:'application/json'});
+            const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download='backup_kkg_2026.json'; a.click();
+        });
+    }
+    function importData(f) {
+        const r = new FileReader();
+        r.onload = e => {
+            const d = JSON.parse(e.target.result);
+            if(confirm("Timpa semua data?")) db.ref('kkg_soal').set(d).then(() => location.reload());
+        };
+        r.readAsText(f.files[0]);
+    }
+    function showTab(id) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-'+id).classList.remove('hidden');
+        const btn = document.querySelector(`[onclick="showTab('${id}')"]`);
+        if(btn) btn.classList.add('active');
+    }
     function preImg(i, t) { if(i.files[0]){ const r=new FileReader(); r.onload=e=>{ const m=document.getElementById(t); m.src=e.target.result; m.classList.remove('hidden'); }; r.readAsDataURL(i.files[0]); } }
-    function getSrc(id) { const e=document.getElementById(id); return e && e.src.startsWith('data') ? e.src : null; }
     function toggleForm() { document.getElementById('panelPG').style.display = (document.getElementById('sBentuk').value === 'PG') ? 'block' : 'none'; }
-    function resetSoal() { document.getElementById('fIdSoal').value=""; document.getElementById('sTanya').value=""; document.getElementById('oa').value=""; document.getElementById('ob').value=""; document.getElementById('oc').value=""; document.getElementById('od').value=""; document.querySelectorAll('.img-pre').forEach(i => { i.src=""; i.classList.add('hidden'); }); document.querySelectorAll('input[type="file"]').forEach(f => f.value = ""); }
+    function resetSoal() { document.getElementById('fIdSoal').value=""; document.getElementById('sTanya').value=""; document.getElementById('oa').value=""; document.getElementById('ob').value=""; document.getElementById('oc').value=""; document.getElementById('od').value=""; document.querySelectorAll('.img-pre').forEach(i => { i.src=""; i.classList.add('hidden'); }); }
     
     db.ref(".info/connected").on("value", s => {
         document.getElementById('db-st').innerText = s.val() ? "● ONLINE" : "○ OFFLINE";
@@ -679,6 +599,7 @@
 </script>
 </body>
 </html>
+
 
 
 
