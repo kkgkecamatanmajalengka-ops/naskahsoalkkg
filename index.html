@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi KKG 2026 - STS Semester 2</title>
+    <title>Aplikasi KKG 2026 - STS Semester 2 (Update Gambar Opsi)</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/evidenceprime/html-docx-js@master/dist/html-docx.js"></script>
     
     <style>
         :root { --p: #1e293b; --a: #2563eb; --s: #10b981; --d: #ef4444; --w: #f59e0b; }
@@ -36,16 +35,15 @@
             .no-print { display: none !important; }
             .print-only { display: block !important; }
             .soal-row { page-break-inside: avoid !important; break-inside: avoid; display: flex; margin-bottom: 15px; align-items: flex-start; text-align: justify; }
+            table tr { page-break-inside: avoid !important; break-inside: avoid; }
             .page-section { page-break-after: always; padding: 0; margin: 0; border: none; }
             #printArea { width: 100% !important; max-width: none !important; }
         }
 
         #printArea { background: white; width: 100%; max-width: 210mm; margin: 0 auto; color: black; }
         .page-section { padding: 0.5cm 0; min-height: 270mm; box-sizing: border-box; background: white; }
-        
-        /* Font Rules */
-        .font-low { font-family: Arial, sans-serif !important; font-size: 12pt !important; line-height: 1.5; }
-        .font-high { font-family: "Times New Roman", serif !important; font-size: 12pt !important; line-height: 1.3; }
+        .font-arial { font-family: Arial, sans-serif !important; font-size: 12pt !important; line-height: 1.4; }
+        .font-tnr { font-family: "Times New Roman", serif !important; font-size: 12pt !important; line-height: 1.4; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { border: 1px solid black; padding: 6px; text-align: left; font-size: 11pt; }
@@ -55,15 +53,17 @@
         .kop-text { text-align: center; width: 100%; }
         .kop-text h3 { margin: 2px 0; line-height: 1.2; text-transform: uppercase; }
 
-        .opsi-container { width: 100%; margin-top: 8px; }
-        
-        /* Layouting Opsi */
-        .grid-2-col { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 30px; }
-        .flex-inline { display: flex; gap: 40px; flex-wrap: wrap; }
-        .stack-vertical { display: flex; flex-direction: column; gap: 5px; }
-        
-        .img-naskah { max-height: 150px; max-width: 100%; object-fit: contain; display: block; margin: 8px 0; }
+        .opsi-container { width: 100%; margin-top: 5px; }
+        .grid-2-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 15px; }
+        .flex-inline { display: flex; gap: 20px; flex-wrap: wrap; }
+        .stack-vertical { display: flex; flex-direction: column; gap: 3px; }
+        .img-naskah { max-height: 150px; max-width: 100%; object-fit: contain; display: block; margin: 5px 0; }
         .img-opsi-naskah { max-height: 80px; display: block; margin-top: 5px; }
+        
+        .stat-bar { height: 30px; background: #e2e8f0; border-radius: 15px; overflow: hidden; display: flex; margin: 20px 0; border: 1px solid #cbd5e1; }
+        .progress-l1 { background: var(--s); height: 100%; transition: 0.5s; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold; }
+        .progress-l2 { background: var(--a); height: 100%; transition: 0.5s; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold; }
+        .progress-l3 { background: var(--d); height: 100%; transition: 0.5s; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold; }
         
         @media screen { .print-only { display: none !important; } }
     </style>
@@ -203,9 +203,8 @@
     </div>
 
     <div id="tab-cetak" class="tab-content hidden">
-        <div class="no-print card" style="text-align:center; display: flex; gap: 10px; justify-content: center;">
-            <button class="btn btn-blue" onclick="window.print()">MULAI CETAK PDF</button>
-            <button class="btn btn-green" onclick="exportToWord()">SIMPAN KE WORD (.doc)</button>
+        <div class="no-print card" style="text-align:center;">
+            <button class="btn btn-blue" onclick="window.print()">MULAI CETAK DOKUMEN</button>
         </div>
         
         <div id="printArea" class="print-only">
@@ -265,10 +264,10 @@
     <div id="tab-db" class="tab-content hidden no-print">
         <div class="card">
             <h3>Analisis Level Soal</h3>
-            <div class="stat-bar" style="height: 30px; background: #e2e8f0; border-radius: 15px; overflow: hidden; display: flex; margin: 20px 0; border: 1px solid #cbd5e1;">
-                <div id="bar-l1" class="progress-l1" style="background: var(--s); height: 100%; transition: 0.5s; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;"></div>
-                <div id="bar-l2" class="progress-l2" style="background: var(--a); height: 100%; transition: 0.5s; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;"></div>
-                <div id="bar-l3" class="progress-l3" style="background: var(--d); height: 100%; transition: 0.5s; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;"></div>
+            <div class="stat-bar">
+                <div id="bar-l1" class="progress-l1"></div>
+                <div id="bar-l2" class="progress-l2"></div>
+                <div id="bar-l3" class="progress-l3"></div>
             </div>
         </div>
         <div class="card">
@@ -350,9 +349,14 @@
         const mapelDasar = ["Pendidikan Pancasila", "Matematika", "Seni Budaya", "Bahasa Indonesia", "Bahasa Sunda"];
         
         let opts = [];
-        if(currentUser.role === 'guru_pai') { opts = ["PAI"]; } 
-        else if(currentUser.role === 'guru_inggris') { opts = ["Bahasa Inggris"]; } 
+        if(currentUser.role === 'guru_pai') { 
+            opts = ["PAI"]; 
+        } 
+        else if(currentUser.role === 'guru_inggris') { 
+            opts = ["Bahasa Inggris"]; 
+        } 
         else if(currentUser.role === 'admin') {
+            // PERBAIKAN: Admin mendapatkan akses semua mata pelajaran termasuk PAI dan Inggris
             opts = ["PAI", ...mapelDasar, "Bahasa Inggris"];
             if(parseInt(k) >= 3) opts.push("IPAS");
         }
@@ -363,15 +367,7 @@
         
         selMapel.innerHTML = opts.map(mapel => `<option value="${mapel}" ${mapel === m ? 'selected' : ''}>${mapel}</option>`).join('');
         document.getElementById('od-w').style.display = (k <= 2) ? "none" : "block";
-        
-        const engine = document.getElementById('f-engine');
-        if(k <= 2) {
-            engine.classList.remove('font-high');
-            engine.classList.add('font-low');
-        } else {
-            engine.classList.remove('font-low');
-            engine.classList.add('font-high');
-        }
+        document.getElementById('f-engine').className = "page-section " + (k <= 2 ? "font-arial" : "font-tnr");
 
         db.ref('kkg_tp').on('value', snap => {
             cacheTP = snap.val() ? Object.values(snap.val()).filter(x => x.k == k && x.m == selMapel.value) : [];
@@ -408,57 +404,20 @@
         document.getElementById('p-naskah').innerHTML = pg.map((s, i) => {
             const hasImgOpsi = s.imgOA || s.imgOB || s.imgOC || s.imgOD;
             const totalChar = (s.oa + s.ob + s.oc + (s.od || "")).length;
-            const avgChar = totalChar / (kls <= 2 ? 3 : 4);
-            
+            const isPanjang = totalChar > 55 || s.imgS || hasImgOpsi;
+
             let opsiHTML = "";
             if (kls <= 2) {
-                const isStack = avgChar > 20 || hasImgOpsi || s.imgS;
-                if(isStack) {
-                    opsiHTML = `<div class="stack-vertical">
-                        <div>a. ${renderOpsi(s.oa, s.imgOA)}</div>
-                        <div>b. ${renderOpsi(s.ob, s.imgOB)}</div>
-                        <div>c. ${renderOpsi(s.oc, s.imgOC)}</div>
-                    </div>`;
-                } else {
-                    opsiHTML = `<div class="flex-inline">
-                        <span>a. ${s.oa}</span>
-                        <span>b. ${s.ob}</span>
-                        <span>c. ${s.oc}</span>
-                    </div>`;
-                }
+                opsiHTML = isPanjang 
+                    ? `<div class="stack-vertical"><div>a. ${renderOpsi(s.oa, s.imgOA)}</div><div>b. ${renderOpsi(s.ob, s.imgOB)}</div><div>c. ${renderOpsi(s.oc, s.imgOC)}</div></div>` 
+                    : `<div class="flex-inline"><span>a. ${s.oa}</span><span>b. ${s.ob}</span><span>c. ${s.oc}</span></div>`;
             } else {
-                const isStack = avgChar > 35 || hasImgOpsi || s.imgS;
-                const isGrid = avgChar > 12 && avgChar <= 35;
-                if(isStack) {
-                    opsiHTML = `<div class="stack-vertical">
-                        <div>a. ${renderOpsi(s.oa, s.imgOA)}</div>
-                        <div>b. ${renderOpsi(s.ob, s.imgOB)}</div>
-                        <div>c. ${renderOpsi(s.oc, s.imgOC)}</div>
-                        <div>d. ${renderOpsi(s.od, s.imgOD)}</div>
-                    </div>`;
-                } else if(isGrid) {
-                    opsiHTML = `<div class="grid-2-col">
-                        <div>a. ${s.oa}</div>
-                        <div>c. ${s.oc}</div>
-                        <div>b. ${s.ob}</div>
-                        <div>d. ${s.od}</div>
-                    </div>`;
-                } else {
-                    opsiHTML = `<div class="flex-inline">
-                        <span>a. ${s.oa}</span>
-                        <span>b. ${s.ob}</span>
-                        <span>c. ${s.oc}</span>
-                        <span>d. ${s.od}</span>
-                    </div>`;
-                }
+                opsiHTML = isPanjang 
+                    ? `<div class="stack-vertical"><div>a. ${renderOpsi(s.oa, s.imgOA)}</div><div>b. ${renderOpsi(s.ob, s.imgOB)}</div><div>c. ${renderOpsi(s.oc, s.imgOC)}</div><div>d. ${renderOpsi(s.od, s.imgOD)}</div></div>` 
+                    : `<div class="grid-2-col"><div>a. ${s.oa}</div><div>c. ${s.oc}</div><div>b. ${s.ob}</div><div>d. ${s.od}</div></div>`;
             }
-            return `<div class="soal-row">
-                <div style="width:30px; font-weight:bold; flex-shrink:0;">${i+1}.</div>
-                <div style="flex-grow:1;">
-                    <div>${s.imgS ? `<img src="${s.imgS}" class="img-naskah">` : ''} ${s.tanya}</div>
-                    <div class="opsi-container">${opsiHTML}</div>
-                </div>
-            </div>`;
+
+            return `<div class="soal-row"><div style="width:30px; font-weight:bold; flex-shrink:0;">${i+1}.</div><div style="flex-grow:1;"><div>${s.imgS ? `<img src="${s.imgS}" class="img-naskah">` : ''} ${s.tanya}</div><div class="opsi-container">${opsiHTML}</div></div></div>`;
         }).join('');
 
         document.getElementById('p-naskah-esai').innerHTML = esai.map((s, i) => `<div class="soal-row"><div style="width:30px; font-weight:bold; flex-shrink:0;">${pg.length + i + 1}.</div><div style="flex-grow:1;">${s.tanya}</div></div>`).join('');
@@ -505,140 +464,33 @@
             document.getElementById('ob').value = d.ob; 
             document.getElementById('oc').value = d.oc; 
             document.getElementById('od').value = d.od;
+            
+            // Preview Gambar jika ada
             if(d.imgS) { document.getElementById('pS').src = d.imgS; document.getElementById('pS').classList.remove('hidden'); }
             if(d.imgOA) { document.getElementById('pOA').src = d.imgOA; document.getElementById('pOA').classList.remove('hidden'); }
             if(d.imgOB) { document.getElementById('pOB').src = d.imgOB; document.getElementById('pOB').classList.remove('hidden'); }
             if(d.imgOC) { document.getElementById('pOC').src = d.imgOC; document.getElementById('pOC').classList.remove('hidden'); }
             if(d.imgOD) { document.getElementById('pOD').src = d.imgOD; document.getElementById('pOD').classList.remove('hidden'); }
+            
             showTab('soal'); toggleForm(); 
         }); 
     }
 
-  function exportToWord() {
-    const mapel = document.getElementById('selMapel').value;
-    const kls = parseInt(document.getElementById('selKls').value);
-    const fontType = kls <= 2 ? 'Arial' : 'Times New Roman';
-    const logoSrc = document.getElementById('p-logo').src;
-
-    // Helper untuk styling font agar terbaca konsisten di MS Word
-    const f = (text, bold = false) => {
-        const b = bold ? 'font-weight:bold;' : '';
-        return `<span style="font-family:'${fontType}'; font-size:12pt; ${b}">${text}</span>`;
-    };
-
-    // --- TEMPLATE KOP ---
-    const kopWord = `
-        <table style="width:100%; border-bottom:2pt solid black; margin-bottom:10px;">
-            <tr>
-                <td style="width:80px;"><img src="${logoSrc}" width="70" height="70"></td>
-                <td style="text-align:center;">
-                    <p style="margin:0;">${f("SUMATIF TENGAH SEMESTER (STS)", true)}</p>
-                    <p style="margin:0;">${f("SEMESTER 2 SEKOLAH DASAR", true)}</p>
-                    <p style="margin:0;">${f("TAHUN AJARAN 2025/2026", true)}</p>
-                </td>
-                <td style="width:80px;"></td>
-            </tr>
-        </table>
-    `;
-
-    // --- TEMPLATE IDENTITAS ---
-    const identitasHTML = `
-        <table style="width:100%; margin-bottom:15px;">
-            <tr>
-                <td style="width:20%;">${f("Mata Pelajaran")}</td>
-                <td style="width:30%;">${f(": " + mapel)}</td>
-                <td style="width:15%;">${f("Nama")}</td>
-                <td>${f(": ...........................")}</td>
-            </tr>
-            <tr>
-                <td>${f("Kelas")}</td>
-                <td>${f(": " + kls)}</td>
-                <td>${f("Nomor")}</td>
-                <td>${f(": ...........................")}</td>
-            </tr>
-        </table>
-    `;
-
-    // --- LOGIKA RENDER SOAL ---
-    const renderSoalWord = (s, i) => {
-        let opsiStr = "";
-        const opsi = [
-            {t: s.oa, img: s.imgOA, lab: 'a'},
-            {t: s.ob, img: s.imgOB, lab: 'b'},
-            {t: s.oc, img: s.imgOC, lab: 'c'}
-        ];
-        if (kls > 2) opsi.push({t: s.od, img: s.imgOD, lab: 'd'});
-
-        // Layouting Opsi: Jika ada gambar atau teks panjang, buat vertikal
-        const isLong = opsi.some(o => (o.t && o.t.length > 30) || o.img);
-        
-        if (isLong) {
-            opsiStr = opsi.map(o => `<div style="margin-left:15px;">${o.lab}. ${o.t || ""} ${o.img ? `<br><img src="${o.img}" width="100">` : ""}</div>`).join('');
-        } else {
-            opsiStr = `<div style="margin-left:15px;">` + opsi.map(o => `${o.lab}. ${o.t} &nbsp;&nbsp;`).join('') + `</div>`;
-        }
-
-        return `
-            <div style="margin-bottom:10px; text-align:justify;">
-                <table>
-                    <tr>
-                        <td style="vertical-align:top; width:25px;">${f(i + ".", true)}</td>
-                        <td>
-                            ${s.imgS ? `<img src="${s.imgS}" width="150"><br>` : ''}
-                            ${f(s.tanya)}
-                            ${s.bentuk === 'PG' ? opsiStr : '<br>........................................................................................'}
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        `;
-    };
-
-    // Ambil data dari Firebase lalu generate
-    db.ref('kkg_soal').once('value', snap => {
-        const allSoal = snap.val() ? Object.values(snap.val()).filter(x => x.k == kls && x.m == mapel) : [];
-        const pg = allSoal.filter(x => x.bentuk === 'PG');
-        const esai = allSoal.filter(x => x.bentuk === 'Esai');
-
-        let content = pg.map((s, i) => renderSoalWord(s, i + 1)).join('');
-        if (esai.length > 0) {
-            content += `<p style="margin-top:15px;">${f("II. Isilah titik-titik di bawah ini dengan benar!", true)}</p>`;
-            content += esai.map((s, i) => renderSoalWord(s, pg.length + i + 1)).join('');
-        }
-
-        // Gabungkan seluruh struktur HTML
-        const fullHtml = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="utf-8">
-            </head>
-            <body style="font-family:'${fontType}';">
-                ${kopWord}
-                ${identitasHTML}
-                <div style="border:1px solid black; padding:5px; text-align:center; margin-bottom:15px;">
-                    ${f("PILIHLAH JAWABAN YANG PALING TEPAT!", true)}
-                </div>
-                ${content}
-            </body>
-            </html>
-        `;
-
-        // Proses Konversi ke .doc
-        const converted = htmlDocx.asBlob(fullHtml, {orientation: 'portrait', margins: {top: 720}});
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(converted);
-        link.download = `SOAL_STS_${mapel}_KLS_${kls}.doc`;
-        link.click();
-    });
-}
     function exportData() { db.ref().once('value', s => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(s.val())], {type:'application/json'})); a.download = 'backup_kkg.json'; a.click(); }); }
     function importData(f) { if(f) { const r = new FileReader(); r.onload = e => db.ref().set(JSON.parse(e.target.result)).then(() => location.reload()); r.readAsText(f); } }
     function showTab(id) { document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById('tab-'+id).classList.remove('hidden'); document.querySelector(`[onclick="showTab('${id}')"]`).classList.add('active'); }
     function preImg(i, t) { if(i.files[0]){ const r=new FileReader(); r.onload=e=>{ const m=document.getElementById(t); m.src=e.target.result; m.classList.remove('hidden'); }; r.readAsDataURL(i.files[0]); } }
     function getSrc(id) { const e=document.getElementById(id); return e && e.src.startsWith('data') ? e.src : null; }
     function toggleForm() { document.getElementById('panelPG').style.display = (document.getElementById('sBentuk').value === 'PG') ? 'block' : 'none'; }
-    function resetSoal() { document.getElementById('fIdSoal').value=""; document.getElementById('sTanya').value=""; document.getElementById('oa').value=""; document.getElementById('ob').value=""; document.getElementById('oc').value=""; document.getElementById('od').value=""; document.querySelectorAll('.img-pre').forEach(i => { i.src=""; i.classList.add('hidden'); }); document.querySelectorAll('input[type="file"]').forEach(f => f.value = ""); }
+    
+    function resetSoal() { 
+        document.getElementById('fIdSoal').value=""; 
+        document.getElementById('sTanya').value=""; 
+        document.getElementById('oa').value=""; document.getElementById('ob').value=""; 
+        document.getElementById('oc').value=""; document.getElementById('od').value="";
+        document.querySelectorAll('.img-pre').forEach(i => { i.src=""; i.classList.add('hidden'); }); 
+        document.querySelectorAll('input[type="file"]').forEach(f => f.value = "");
+    }
     
     db.ref(".info/connected").on("value", s => {
         document.getElementById('db-st').innerText = s.val() ? "● ONLINE" : "○ OFFLINE";
@@ -647,7 +499,3 @@
 </script>
 </body>
 </html>
-
-
-
-
