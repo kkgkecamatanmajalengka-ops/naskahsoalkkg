@@ -26,8 +26,11 @@
         .img-pre { max-height: 80px; display: block; margin: 5px 0; border: 1px solid #ddd; }
         .hidden { display: none; }
 
+        #login-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f1f5f9; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .login-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 350px; }
+
         @media print {
-            @page { size: A4; margin: 1cm 1.5cm 1.2cm 1.5cm; }
+            @page { size: A4; margin: 1cm 1.5cm 1.2cm 1.5cm; } /* Margin dioptimalkan lebih rapat */
             body { background: white !important; }
             .no-print { display: none !important; }
             .print-only { display: block !important; }
@@ -201,9 +204,8 @@
     </div>
 
     <div id="tab-cetak" class="tab-content hidden">
-        <div class="no-print card" style="text-align:center; display: flex; justify-content: center; gap: 10px;">
-            <button class="btn btn-blue" onclick="window.print()">CETAK / SAVE PDF</button>
-            <button class="btn btn-green" onclick="exportToWord()">SIMPAN KE MS WORD</button>
+        <div class="no-print card" style="text-align:center;">
+            <button class="btn btn-blue" onclick="window.print()">MULAI CETAK DOKUMEN</button>
         </div>
         
         <div id="printArea" class="print-only">
@@ -401,35 +403,69 @@
 
         document.getElementById('p-naskah').innerHTML = pg.map((s, i) => {
             let teksTanya = s.tanya;
-            // OTOMATIS MERAPIKAN SOAL MENYUSUN/URUTAN
             if (teksTanya.match(/\d[\.\)]/)) {
                 teksTanya = teksTanya.replace(/(\d+[\.\)])/g, '<br>$1');
             }
 
             const hasImgOpsi = s.imgOA || s.imgOB || s.imgOC || s.imgOD;
-            const totalChar = (s.oa + s.ob + s.oc + (s.od || "")).length;
-            const isPanjang = totalChar > 55 || s.imgS || hasImgOpsi;
-
+            // Deteksi panjang teks untuk menentukan kapan harus ganti baris (menurun)
+            const maxChar = Math.max(s.oa.length, (s.ob || "").length, (s.oc || "").length);
+            
             let opsiHTML = "";
             if (kls <= 2) {
-                opsiHTML = isPanjang 
-                    ? `<div class="stack-vertical"><div>a. ${renderOpsi(s.oa, s.imgOA)}</div><div>b. ${renderOpsi(s.ob, s.imgOB)}</div><div>c. ${renderOpsi(s.oc, s.imgOC)}</div></div>` 
-                    : `<div class="flex-inline"><span>a. ${s.oa}</span><span>b. ${s.ob}</span><span>c. ${s.oc}</span></div>`;
+                // KELAS 1-2: Jika teks panjang atau ada gambar, opsi disusun menurun
+                if (hasImgOpsi || maxChar > 20) {
+                    opsiHTML = `<div class="stack-vertical">
+                        <div>a. ${renderOpsi(s.oa, s.imgOA)}</div>
+                        <div>b. ${renderOpsi(s.ob, s.imgOB)}</div>
+                        <div>c. ${renderOpsi(s.oc, s.imgOC)}</div>
+                    </div>`;
+                } else {
+                    // SEJAJAR SIMETRIS: Menggunakan lebar kolom 150px agar huruf a, b, c lurus ke bawah
+                    opsiHTML = `<div style="display: flex; margin-top: 5px;">
+                        <div style="width: 150px; flex-shrink: 0;">a. ${s.oa}</div>
+                        <div style="width: 150px; flex-shrink: 0;">b. ${s.ob}</div>
+                        <div style="width: 150px; flex-shrink: 0;">c. ${s.oc}</div>
+                    </div>`;
+                }
             } else {
-                opsiHTML = isPanjang 
+                // KELAS 3-6: Standar 2 kolom atau menurun jika panjang
+                opsiHTML = (maxChar > 25 || hasImgOpsi) 
                     ? `<div class="stack-vertical"><div>a. ${renderOpsi(s.oa, s.imgOA)}</div><div>b. ${renderOpsi(s.ob, s.imgOB)}</div><div>c. ${renderOpsi(s.oc, s.imgOC)}</div><div>d. ${renderOpsi(s.od, s.imgOD)}</div></div>` 
                     : `<div class="grid-2-col"><div>a. ${s.oa}</div><div>c. ${s.oc}</div><div>b. ${s.ob}</div><div>d. ${s.od}</div></div>`;
             }
 
-            return `<div class="soal-row"><div style="width:30px; font-weight:bold; flex-shrink:0;">${i+1}.</div><div style="flex-grow:1;"><div>${s.imgS ? `<img src="${s.imgS}" class="img-naskah">` : ''} ${teksTanya}</div><div class="opsi-container">${opsiHTML}</div></div></div>`;
+            // Layout Soal: Gambar di samping teks
+            let kontenSoal = "";
+            if (s.imgS) {
+                kontenSoal = `
+                <div style="display: flex; gap: 15px; align-items: flex-start; margin-bottom: 5px;">
+                    <img src="${s.imgS}" style="max-width: 160px; max-height: 140px; object-fit: contain; border: 1px solid #eee;">
+                    <div style="flex: 1; text-align: justify;">${teksTanya}</div>
+                </div>`;
+            } else {
+                kontenSoal = `<div style="margin-bottom: 5px; text-align: justify;">${teksTanya}</div>`;
+            }
+
+            return `
+            <div class="soal-row" style="margin-bottom: 15px; display: flex;">
+                <div style="width:25px; font-weight:bold; flex-shrink:0;">${i+1}.</div>
+                <div style="flex-grow:1;">
+                    ${kontenSoal}
+                    <div class="opsi-container">
+                        ${opsiHTML}
+                    </div>
+                </div>
+            </div>`;
         }).join('');
 
+        // Merender bagian Esai
         document.getElementById('p-naskah-esai').innerHTML = esai.map((s, i) => {
             let teksTanyaEsai = s.tanya;
             if (teksTanyaEsai.match(/\d[\.\)]/)) {
                 teksTanyaEsai = teksTanyaEsai.replace(/(\d+[\.\)])/g, '<br>$1');
             }
-            return `<div class="soal-row"><div style="width:30px; font-weight:bold; flex-shrink:0;">${pg.length + i + 1}.</div><div style="flex-grow:1;">${teksTanyaEsai}</div></div>`;
+            return `<div class="soal-row"><div style="width:25px; font-weight:bold; flex-shrink:0;">${pg.length + i + 1}.</div><div style="flex-grow:1; text-align: justify;">${teksTanyaEsai}</div></div>`;
         }).join('');
 
         document.getElementById('p-kunci').innerHTML = soals.map((s, i) => `<tr><td style="text-align:center;">${i+1}</td><td>${s.kunci}</td><td style="text-align:center;">${s.skor}</td></tr>`).join('');
@@ -488,34 +524,6 @@
 
     function exportData() { db.ref().once('value', s => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(s.val())], {type:'application/json'})); a.download = 'backup_kkg.json'; a.click(); }); }
     function importData(f) { if(f) { const r = new FileReader(); r.onload = e => db.ref().set(JSON.parse(e.target.result)).then(() => location.reload()); r.readAsText(f); } }
-    
-    // FUNGSI EKSPOR KE WORD
-    function exportToWord() {
-        const kls = document.getElementById('selKls').value;
-        const fontClass = (parseInt(kls) <= 2) ? "Arial, sans-serif" : "'Times New Roman', serif";
-        
-        var header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' "+
-                "xmlns:w='urn:schemas-microsoft-com:office:word' "+
-                "xmlns='http://www.w3.org/TR/REC-html40'>"+
-                "<head><meta charset='utf-8'><title>Export MS Word</title><style>"+
-                "body{font-family:" + fontClass + "; font-size:11pt;} "+
-                "table{border-collapse:collapse; width:100%; margin-top:10px;} td,th{border:1px solid black; padding:5px; font-size:10pt;} "+
-                ".soal-row{margin-bottom:10px; display:block; page-break-inside: avoid;} "+
-                ".kop{text-align:center; border-bottom:3px double black; padding-bottom:10px; margin-bottom:15px;} "+
-                ".no-print, button {display:none;} "+
-                "</style></head><body>";
-        var footer = "</body></html>";
-        var sourceHTML = header + document.getElementById("f-engine").innerHTML + footer;
-        
-        var source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
-        var fileDownload = document.createElement("a");
-        document.body.appendChild(fileDownload);
-        fileDownload.href = source;
-        fileDownload.download = 'Soal_STS_2026.doc';
-        fileDownload.click();
-        document.body.removeChild(fileDownload);
-    }
-
     function showTab(id) { document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById('tab-'+id).classList.remove('hidden'); document.querySelector(`[onclick="showTab('${id}')"]`).classList.add('active'); }
     function preImg(i, t) { if(i.files[0]){ const r=new FileReader(); r.onload=e=>{ const m=document.getElementById(t); m.src=e.target.result; m.classList.remove('hidden'); }; r.readAsDataURL(i.files[0]); } }
     function getSrc(id) { const e=document.getElementById(id); return e && e.src.startsWith('data') ? e.src : null; }
@@ -537,3 +545,4 @@
 </script>
 </body>
 </html>
+
