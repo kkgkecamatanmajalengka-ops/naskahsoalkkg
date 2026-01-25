@@ -45,16 +45,6 @@
             body { background: white !important; }
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            .soal-row { 
-                page-break-inside: avoid !important; 
-                break-inside: avoid; 
-                display: flex; 
-                margin-bottom: 20px !important; /* Jarak antar nomor konsisten */
-                align-items: flex-start; 
-                text-align: justify; 
-                line-height: 1.4;
-            }
-            table tr { page-break-inside: avoid !important; break-inside: avoid; }
             .page-section { page-break-after: always; padding: 0; margin: 0; border: none; }
             #printArea { width: 100% !important; max-width: none !important; }
             .kop { border-bottom: 3px solid black !important; margin-bottom: 10px !important; min-height: 70px !important; }
@@ -63,19 +53,25 @@
         #printArea { background: white; width: 100%; max-width: 210mm; margin: 0 auto; color: black; }
         .page-section { padding: 0.5cm 0; min-height: 270mm; box-sizing: border-box; background: white; }
         
+        /* Tata Letak Soal Tabel untuk Word agar Sejajar */
+        .soal-table { width: 100%; border-collapse: collapse; border: none; margin-bottom: 15px; table-layout: fixed; }
+        .soal-table td { border: none; vertical-align: top; padding: 1px; }
+        .num-col { width: 25px; font-weight: bold; }
+        
+        .opsi-table { width: 100%; border-collapse: collapse; border: none; margin-top: 5px; }
+        .opsi-table td { border: none; padding: 2px 0; vertical-align: top; }
+
         .font-kls-rendah { font-family: Arial, sans-serif !important; font-size: 12pt !important; }
         .font-kls-tinggi { font-family: "Times New Roman", serif !important; font-size: 12pt !important; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid black; padding: 6px; text-align: left; font-size: 10pt; }
+        table.kisi-kunci { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        table.kisi-kunci th, table.kisi-kunci td { border: 1px solid black; padding: 6px; text-align: left; font-size: 10pt; }
         
         .kop { display: flex; align-items: center; justify-content: center; border-bottom: 4px double black; padding-bottom: 10px; margin-bottom: 20px; position: relative; min-height: 90px; }
         .kop img { position: absolute; left: 0; height: 75px; width: auto; }
         .kop-text { text-align: center; width: 100%; }
         .kop-text h3 { margin: 2px 0; line-height: 1.2; text-transform: uppercase; }
 
-        .opsi-container { width: 100%; margin-top: 5px; }
-        .stack-vertical { display: flex; flex-direction: column; gap: 4px; }
         .img-naskah { max-height: 150px; max-width: 90%; object-fit: contain; display: block; margin: 5px 0; }
         .img-opsi-naskah { max-height: 60px; display: block; margin-top: 2px; }
         
@@ -114,7 +110,7 @@
 </header>
 
 <div class="running-text no-print">
-    <marquee scrollamount="6">KKG Kecamatan Majalengka Langkung Sae - Semangat Mensukseskan Asesmen Sumatif 2026 - Mari Susun Soal Berkualitas Berbasis Literasi dan Numerasi untuk Masa Depan Pendidikan - Terus Terhubung dengan Database Cloud KKG - Pastikan Data Tersimpan dengan Benar</marquee>
+    <marquee scrollamount="6">KKG Kecamatan Majalengka Langkung Sae - Semangat Mensukseskan Asesmen Sumatif 2026</marquee>
 </div>
 
 <div class="nav no-print">
@@ -157,7 +153,7 @@
         </div>
         <div class="card">
             <h4>Daftar TP</h4>
-            <table><thead><tr><th>Elemen</th><th>TP</th><th style="width:120px;">Aksi</th></tr></thead><tbody id="bodyTP"></tbody></table>
+            <table class="kisi-kunci"><thead><tr><th>Elemen</th><th>TP</th><th style="width:120px;">Aksi</th></tr></thead><tbody id="bodyTP"></tbody></table>
         </div>
     </div>
 
@@ -234,7 +230,7 @@
         <div id="printArea" class="print-only">
             <div class="page-section">
                 <center><h3 style="margin-bottom:20px;">KISI-KISI ASESMEN SUMATIF</h3></center>
-                <table>
+                <table class="kisi-kunci">
                     <thead>
                         <tr><th style="width:30px;">No</th><th>Elemen</th><th>TP</th><th>Indikator</th><th style="width:40px;">Lvl</th><th style="width:60px;">Bentuk</th></tr>
                     </thead>
@@ -278,7 +274,7 @@
 
             <div class="page-section">
                 <center><h3 style="margin-bottom:20px;">KUNCI JAWABAN & PENSKORAN</h3></center>
-                <table style="width:70%; margin: 0 auto;">
+                <table class="kisi-kunci" style="width:70%; margin: 0 auto;">
                     <thead><tr><th style="width:50px;">No</th><th>Kunci Jawaban</th><th style="width:100px;">Skor Maks</th></tr></thead>
                     <tbody id="p-kunci"></tbody>
                 </table>
@@ -408,12 +404,16 @@
         return (teks || "") + imgTag;
     }
 
+    /* renderAll yang Diperbaiki untuk Perataan Word */
     function renderAll(soals, kls) {
         const romawi = ["I", "II", "III", "IV", "V", "VI"];
         const teksKls = ["Satu", "Dua", "Tiga", "Empat", "Lima", "Enam"];
+        const isKlsRendah = kls <= 2;
+
         document.getElementById('p-mapel-val').innerText = document.getElementById('selMapel').value;
         document.getElementById('p-kls-val').innerText = romawi[kls-1] + " (" + teksKls[kls-1] + ")";
 
+        // Kisi-kisi
         document.getElementById('p-kisi').innerHTML = soals.map((s, i) => {
             const dataTP = cacheTP.find(x => x.tp.trim() === s.tp.trim());
             return `<tr><td>${i+1}</td><td>${dataTP ? dataTP.e : "-"}</td><td>${s.tp}</td><td>${s.ind}</td><td>${s.lv}</td><td>${s.bentuk}</td></tr>`;
@@ -422,90 +422,60 @@
         const pg = soals.filter(x => x.bentuk === 'PG');
         const esai = soals.filter(x => x.bentuk === 'Esai');
 
+        // Naskah PG dengan Tabel agar Sejajar di Word
         document.getElementById('p-naskah').innerHTML = pg.map((s, i) => {
-            let teksTanya = s.tanya;
-            
-            if (teksTanya.match(/\d[\.\)]/)) {
-                teksTanya = teksTanya.replace(/(\d+[\.\)])/g, '<br>$1');
-            }
-            
-            const pemisahPertanyaan = teksTanya.split(/(\.{3,}|\?)/);
-            if (pemisahPertanyaan.length > 1) {
-                const isiTanya = pemisahPertanyaan.pop(); 
-                const tanda = pemisahPertanyaan.pop();    
-                const stimulus = pemisahPertanyaan.join("");
-                teksTanya = stimulus + tanda + `<div style="margin-top:10px; font-weight:bold;">` + isiTanya + `</div>`;
-            }
-
-            const hasImgOpsi = s.imgOA || s.imgOB || s.imgOC || s.imgOD;
-            const maxChar = Math.max(s.oa.length, (s.ob || "").length, (s.oc || "").length, (s.od || "").length);
-            
             let opsiHTML = "";
-            if (kls <= 2) {
-                if (hasImgOpsi || maxChar > 20) {
-                    opsiHTML = `<div class="stack-vertical" style="margin-left: 5px;">
-                        <div>a. ${renderOpsi(s.oa, s.imgOA)}</div>
-                        <div>b. ${renderOpsi(s.ob, s.imgOB)}</div>
-                        <div>c. ${renderOpsi(s.oc, s.imgOC)}</div>
-                    </div>`;
-                } else {
-                    opsiHTML = `<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-top: 5px; margin-left: 5px;">
-                        <div>a. ${s.oa}</div>
-                        <div>b. ${s.ob}</div>
-                        <div>c. ${s.oc}</div>
-                    </div>`;
-                }
+            if (isKlsRendah) {
+                // Kelas 1-2: 3 Kolom
+                opsiHTML = `
+                <table class="opsi-table">
+                    <tr>
+                        <td width="33%">a. ${renderOpsi(s.oa, s.imgOA)}</td>
+                        <td width="33%">b. ${renderOpsi(s.ob, s.imgOB)}</td>
+                        <td width="33%">c. ${renderOpsi(s.oc, s.imgOC)}</td>
+                    </tr>
+                </table>`;
             } else {
-                if (hasImgOpsi || maxChar > 25) {
-                    opsiHTML = `<div class="stack-vertical" style="margin-left: 5px;">
-                        <div>a. ${renderOpsi(s.oa, s.imgOA)}</div>
-                        <div>b. ${renderOpsi(s.ob, s.imgOB)}</div>
-                        <div>c. ${renderOpsi(s.oc, s.imgOC)}</div>
-                        <div>d. ${renderOpsi(s.od, s.imgOD)}</div>
-                    </div>`;
-                } else {
-                    // Penyesuaian jarak kolom c & d untuk kelas atas (3-6)
-                    opsiHTML = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 60px; width: 100%; margin-left: 5px; margin-top: 5px;">
-                        <div>a. ${s.oa}</div><div>c. ${s.oc}</div>
-                        <div>b. ${s.ob}</div><div>d. ${s.od}</div>
-                    </div>`;
-                }
+                // Kelas 3-6: 2 Kolom (A sejajar C, B sejajar D)
+                opsiHTML = `
+                <table class="opsi-table">
+                    <tr>
+                        <td width="50%">a. ${renderOpsi(s.oa, s.imgOA)}</td>
+                        <td width="50%" style="padding-left:40pt;">c. ${renderOpsi(s.oc, s.imgOC)}</td>
+                    </tr>
+                    <tr>
+                        <td width="50%">b. ${renderOpsi(s.ob, s.imgOB)}</td>
+                        <td width="50%" style="padding-left:40pt;">d. ${renderOpsi(s.od, s.imgOD)}</td>
+                    </tr>
+                </table>`;
             }
 
-            let kontenSoal = "";
-            if (s.imgS) {
-                kontenSoal = `
-                <div style="display: flex; gap: 15px; align-items: flex-start; margin-bottom: 5px;">
-                    <img src="${s.imgS}" style="max-width: 170px; max-height: 140px; object-fit: contain; border: 1px solid #eee;">
-                    <div style="flex: 1; text-align: justify;">${teksTanya}</div>
-                </div>`;
-            } else {
-                kontenSoal = `<div style="margin-bottom: 5px; text-align: justify;">${teksTanya}</div>`;
-            }
+            let stimulus = s.imgS ? `<img src="${s.imgS}" class="img-naskah">` : "";
 
             return `
-            <div class="soal-row">
-                <div style="width:25px; font-weight:bold; flex-shrink:0;">${i+1}.</div>
-                <div style="flex-grow:1;">
-                    ${kontenSoal}
-                    <div class="opsi-container">
+            <table class="soal-table">
+                <tr>
+                    <td class="num-col">${i+1}.</td>
+                    <td>
+                        ${stimulus}
+                        <div style="text-align:justify;">${s.tanya}</div>
                         ${opsiHTML}
-                    </div>
-                </div>
-            </div>`;
+                    </td>
+                </tr>
+            </table>`;
         }).join('');
 
-        if (esai.length > 0) {
-            document.getElementById('p-header-esai').style.display = 'block';
-        }
+        if (esai.length > 0) document.getElementById('p-header-esai').style.display = 'block';
 
-        document.getElementById('p-naskah-esai').innerHTML = esai.map((s, i) => {
-            let teksTanyaEsai = s.tanya;
-            if (teksTanyaEsai.match(/\d[\.\)]/)) {
-                teksTanyaEsai = teksTanyaEsai.replace(/(\d+[\.\)])/g, '<br>$1');
-            }
-            return `<div class="soal-row"><div style="width:25px; font-weight:bold; flex-shrink:0;">${pg.length + i + 1}.</div><div style="flex-grow:1; text-align: justify;">${teksTanyaEsai}</div></div>`;
-        }).join('');
+        // Naskah Esai dengan Tabel
+        document.getElementById('p-naskah-esai').innerHTML = esai.map((s, i) => `
+            <table class="soal-table">
+                <tr>
+                    <td class="num-col">${pg.length + i + 1}.</td>
+                    <td style="text-align:justify;">${s.tanya}</td>
+                </tr>
+            </table>
+        `).join('');
 
         document.getElementById('p-kunci').innerHTML = soals.map((s, i) => `<tr><td style="text-align:center;">${i+1}</td><td>${s.kunci}</td><td style="text-align:center;">${s.skor}</td></tr>`).join('');
         document.getElementById('listSoal').innerHTML = soals.map(s => `<div class="card" style="display:flex; justify-content:space-between; align-items:center;"><div><b>[${s.lv}]</b> ${s.tanya.substring(0,60)}...</div><div><button class="btn-sm btn-blue" onclick="editSoal('${s.id}')">Edit</button><button class="btn-sm btn-red" onclick="if(confirm('Hapus soal?')) db.ref('kkg_soal/${s.id}').remove()">X</button></div></div>`).join('');
@@ -567,37 +537,34 @@
     function preImg(i, t) { if(i.files[0]){ const r=new FileReader(); r.onload=e=>{ const m=document.getElementById(t); m.src=e.target.result; m.classList.remove('hidden'); }; r.readAsDataURL(i.files[0]); } }
     function getSrc(id) { const e=document.getElementById(id); return e && e.src.startsWith('data') ? e.src : null; }
     function toggleForm() { document.getElementById('panelPG').style.display = (document.getElementById('sBentuk').value === 'PG') ? 'block' : 'none'; }
-    
-    function resetSoal() { 
-        document.getElementById('fIdSoal').value=""; 
-        document.getElementById('sTanya').value=""; 
-        document.getElementById('oa').value=""; document.getElementById('ob').value=""; 
-        document.getElementById('oc').value=""; document.getElementById('od').value="";
-        document.querySelectorAll('.img-pre').forEach(i => { i.src=""; i.classList.add('hidden'); }); 
-        document.querySelectorAll('input[type="file"]').forEach(f => f.value = "");
-    }
+    function resetSoal() { document.getElementById('fIdSoal').value=""; document.getElementById('sTanya').value=""; document.getElementById('oa').value=""; document.getElementById('ob').value=""; document.getElementById('oc').value=""; document.getElementById('od').value=""; document.querySelectorAll('.img-pre').forEach(i => { i.src=""; i.classList.add('hidden'); }); document.querySelectorAll('input[type="file"]').forEach(f => f.value = ""); }
     
     db.ref(".info/connected").on("value", s => {
         document.getElementById('db-st').innerText = s.val() ? "● ONLINE" : "○ OFFLINE";
         document.getElementById('db-st').style.color = s.val() ? "#10b981" : "#ef4444";
     });
 
+    /* exportToWord Diperbaiki agar Font dan Tabel Sesuai Permintaan */
     function exportToWord() {
         const content = document.getElementById('printArea').innerHTML;
         const mapel = document.getElementById('p-mapel-val').innerText || "Soal";
-        const kls = document.getElementById('p-kls-val').innerText || "";
+        const klsNum = document.getElementById('selKls').value;
+        const fontTarget = klsNum <= 2 ? "Arial, sans-serif" : "'Times New Roman', serif";
         
         const css = `
             <style>
-                @page Section1 { size: 210mm 297mm; margin: 1cm 1.5cm 1.2cm 1.5cm; }
+                @page Section1 { size: 210mm 297mm; margin: 1.5cm 1.5cm 1.5cm 1.5cm; }
                 div.Section1 { page: Section1; }
-                body { font-family: 'Times New Roman', serif; font-size: 12pt; }
-                table { border-collapse: collapse; width: 100%; margin-top: 10pt; }
-                th, td { border: 1pt solid black; padding: 5pt; font-size: 10pt; }
+                body { font-family: ${fontTarget}; font-size: 12pt; color: black; }
+                .soal-table { width: 100%; border-collapse: collapse; margin-bottom: 15pt; }
+                .soal-table td { border: none; vertical-align: top; padding: 1pt; }
+                .num-col { width: 25pt; font-weight: bold; }
+                .opsi-table { width: 100%; border-collapse: collapse; margin-top: 5pt; }
+                .opsi-table td { border: none; padding: 2pt 0; vertical-align: top; }
+                .kisi-kunci { width: 100%; border-collapse: collapse; }
+                .kisi-kunci th, .kisi-kunci td { border: 1pt solid black; padding: 5pt; font-size: 10pt; }
                 .kop { text-align: center; border-bottom: 4pt double black; margin-bottom: 15pt; padding-bottom: 10pt; }
-                .soal-row { margin-bottom: 20pt; display: block; clear: both; page-break-inside: avoid; }
-                .opsi-container { margin-top: 5pt; }
-                img { max-width: 200pt; height: auto; display: block; }
+                img { max-width: 150pt; height: auto; }
                 h3 { margin: 2pt 0; text-transform: uppercase; text-align: center; }
             </style>
         `;
@@ -610,7 +577,7 @@
         `;
 
         const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-        saveAs(blob, `STS_S2_${mapel}_Kls_${kls}.doc`);
+        saveAs(blob, `STS_S2_${mapel}_Kls_${klsNum}.doc`);
     }
 </script>
 </body>
