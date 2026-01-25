@@ -13,7 +13,6 @@
         body { font-family: 'Inter', sans-serif; background: #f1f5f9; margin: 0; color: #1e293b; }
         header { background: var(--p); color: white; padding: 15px; text-align: center; border-bottom: 4px solid var(--a); }
         
-        /* Gaya Teks Berjalan */
         .running-text {
             background: #fbbf24;
             color: #1e293b;
@@ -423,8 +422,21 @@
 
         document.getElementById('p-naskah').innerHTML = pg.map((s, i) => {
             let teksTanya = s.tanya;
+            
+            // --- PERBAIKAN LOGIKA TEKS ---
+            // 1. Pecah angka urutan (1, 2, 3...) agar ganti baris
             if (teksTanya.match(/\d[\.\)]/)) {
                 teksTanya = teksTanya.replace(/(\d+[\.\)])/g, '<br>$1');
+            }
+            
+            // 2. Deteksi kalimat pertanyaan (biasanya di akhir dengan titik-titik atau tanda tanya)
+            // Kita pisahkan kalimat terakhir yang mengandung "..." atau "?" agar tidak menempel di poin 4
+            const pemisahPertanyaan = teksTanya.split(/(\.{3,}|\?)/);
+            if (pemisahPertanyaan.length > 1) {
+                const isiTanya = pemisahPertanyaan.pop(); // ambil sisa teks jika ada
+                const tanda = pemisahPertanyaan.pop();    // ambil tanda ... atau ?
+                const stimulus = pemisahPertanyaan.join("");
+                teksTanya = stimulus + tanda + `<div style="margin-top:10px; font-weight:bold;">` + isiTanya + `</div>`;
             }
 
             const hasImgOpsi = s.imgOA || s.imgOB || s.imgOC || s.imgOD;
@@ -432,7 +444,6 @@
             
             let opsiHTML = "";
             if (kls <= 2) {
-                // KELAS 1-2: SEJAJAR JIKA PENDEK, MENURUN JIKA PANJANG/GAMBAR
                 if (hasImgOpsi || maxChar > 20) {
                     opsiHTML = `<div class="stack-vertical" style="margin-left: 5px;">
                         <div>a. ${renderOpsi(s.oa, s.imgOA)}</div>
@@ -447,7 +458,6 @@
                     </div>`;
                 }
             } else {
-                // KELAS 3-6: 2 KIRI (A,B) 2 KANAN (C,D) - POSISI SEJAJAR
                 if (hasImgOpsi || maxChar > 25) {
                     opsiHTML = `<div class="stack-vertical" style="margin-left: 5px;">
                         <div>a. ${renderOpsi(s.oa, s.imgOA)}</div>
@@ -456,7 +466,6 @@
                         <div>d. ${renderOpsi(s.od, s.imgOD)}</div>
                     </div>`;
                 } else {
-                    // Grid 2 kolom dengan gap renggang (80px)
                     opsiHTML = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px 80px; width: 100%; margin-left: 5px;">
                         <div>a. ${s.oa}</div><div>c. ${s.oc}</div>
                         <div>b. ${s.ob}</div><div>d. ${s.od}</div>
