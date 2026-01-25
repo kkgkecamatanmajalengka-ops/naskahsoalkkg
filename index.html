@@ -248,7 +248,6 @@
                     Berilah tanda silang (X) pada huruf a, b, c atau d untuk jawaban yang paling benar!
                 </div>
                 <div id="p-naskah"></div>
-                <div style="font-weight:bold; margin-top:20px; margin-bottom:10px;">Isilah titik-titik di bawah ini dengan jawaban yang benar!</div>
                 <div id="p-naskah-esai"></div>
             </div>
 
@@ -408,34 +407,30 @@
             }
 
             const hasImgOpsi = s.imgOA || s.imgOB || s.imgOC || s.imgOD;
-            // Deteksi panjang teks untuk menentukan kapan harus ganti baris (menurun)
             const maxChar = Math.max(s.oa.length, (s.ob || "").length, (s.oc || "").length);
             
             let opsiHTML = "";
             if (kls <= 2) {
-                // KELAS 1-2: Jika teks panjang atau ada gambar, opsi disusun menurun
-                if (hasImgOpsi || maxChar > 20) {
-                    opsiHTML = `<div class="stack-vertical">
+                if (hasImgOpsi) {
+                    opsiHTML = `<div class="stack-vertical" style="gap: 15px; margin-top: 10px;">
                         <div>a. ${renderOpsi(s.oa, s.imgOA)}</div>
                         <div>b. ${renderOpsi(s.ob, s.imgOB)}</div>
                         <div>c. ${renderOpsi(s.oc, s.imgOC)}</div>
                     </div>`;
                 } else {
-                    // SEJAJAR SIMETRIS: Menggunakan lebar kolom 150px agar huruf a, b, c lurus ke bawah
-                    opsiHTML = `<div style="display: flex; margin-top: 5px;">
-                        <div style="width: 150px; flex-shrink: 0;">a. ${s.oa}</div>
-                        <div style="width: 150px; flex-shrink: 0;">b. ${s.ob}</div>
-                        <div style="width: 150px; flex-shrink: 0;">c. ${s.oc}</div>
+                    // SEJAJAR SIMETRIS: Menggunakan min-width dan gap besar agar renggang
+                    opsiHTML = `<div style="display: flex; gap: 60px; margin-top: 10px; flex-wrap: wrap;">
+                        <div style="min-width: 130px;">a. ${s.oa}</div>
+                        <div style="min-width: 130px;">b. ${s.ob}</div>
+                        <div style="min-width: 130px;">c. ${s.oc}</div>
                     </div>`;
                 }
             } else {
-                // KELAS 3-6: Standar 2 kolom atau menurun jika panjang
                 opsiHTML = (maxChar > 25 || hasImgOpsi) 
                     ? `<div class="stack-vertical"><div>a. ${renderOpsi(s.oa, s.imgOA)}</div><div>b. ${renderOpsi(s.ob, s.imgOB)}</div><div>c. ${renderOpsi(s.oc, s.imgOC)}</div><div>d. ${renderOpsi(s.od, s.imgOD)}</div></div>` 
                     : `<div class="grid-2-col"><div>a. ${s.oa}</div><div>c. ${s.oc}</div><div>b. ${s.ob}</div><div>d. ${s.od}</div></div>`;
             }
 
-            // Layout Soal: Gambar di samping teks
             let kontenSoal = "";
             if (s.imgS) {
                 kontenSoal = `
@@ -459,8 +454,14 @@
             </div>`;
         }).join('');
 
-        // Merender bagian Esai
-        document.getElementById('p-naskah-esai').innerHTML = esai.map((s, i) => {
+        // Merender bagian Esai dengan Jarak dan Instruksi
+        const instruksiEsai = esai.length > 0 ? `
+            <div style="margin-top: 40px; border-top: 2px solid black; padding-top: 15px; margin-bottom: 15px;">
+                <b style="text-transform: uppercase;">Isilah titik-titik di bawah ini dengan jawaban yang benar!</b>
+            </div>
+        ` : "";
+
+        document.getElementById('p-naskah-esai').innerHTML = instruksiEsai + esai.map((s, i) => {
             let teksTanyaEsai = s.tanya;
             if (teksTanyaEsai.match(/\d[\.\)]/)) {
                 teksTanyaEsai = teksTanyaEsai.replace(/(\d+[\.\)])/g, '<br>$1');
@@ -469,7 +470,19 @@
         }).join('');
 
         document.getElementById('p-kunci').innerHTML = soals.map((s, i) => `<tr><td style="text-align:center;">${i+1}</td><td>${s.kunci}</td><td style="text-align:center;">${s.skor}</td></tr>`).join('');
-        document.getElementById('listSoal').innerHTML = soals.map(s => `<div class="card" style="display:flex; justify-content:space-between; align-items:center;"><div><b>[${s.lv}]</b> ${s.tanya.substring(0,60)}...</div><div><button class="btn-sm btn-blue" onclick="editSoal('${s.id}')">Edit</button><button class="btn-sm btn-red" onclick="if(confirm('Hapus soal?')) db.ref('kkg_soal/${s.id}').remove()">X</button></div></div>`).join('');
+        
+        // Memunculkan nomor soal di list input agar mudah diedit
+        document.getElementById('listSoal').innerHTML = soals.map((s, i) => `
+            <div class="card" style="display:flex; justify-content:space-between; align-items:center; border-left: 5px solid var(--a);">
+                <div>
+                    <span style="background: var(--p); color: white; padding: 2px 8px; border-radius: 4px; margin-right: 10px; font-size: 12px;">#${i + 1}</span>
+                    <b>[${s.lv}]</b> ${s.tanya.substring(0,60)}...
+                </div>
+                <div>
+                    <button class="btn-sm btn-blue" onclick="editSoal('${s.id}')">Edit</button>
+                    <button class="btn-sm btn-red" onclick="if(confirm('Hapus soal nomor ${i + 1}?')) db.ref('kkg_soal/${s.id}').remove()">X</button>
+                </div>
+            </div>`).join('');
     }
 
     function updateStats(soals) {
@@ -545,4 +558,3 @@
 </script>
 </body>
 </html>
-
