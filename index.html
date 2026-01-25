@@ -397,60 +397,64 @@
         const pg = soals.filter(x => x.bentuk === 'PG');
         const esai = soals.filter(x => x.bentuk === 'Esai');
 
-        document.getElementById('p-naskah').innerHTML = pg.map((s, i) => {
-            let teksTanya = s.tanya;
-            if (teksTanya.match(/\d[\.\)]/)) {
-                teksTanya = teksTanya.replace(/(\d+[\.\)])/g, '<br>$1');
-            }
+       // --- GANTI BAGIAN DI DALAM renderAll (khusus bagian render PG) DENGAN INI ---
 
-            const hasImgOpsi = s.imgOA || s.imgOB || s.imgOC || s.imgOD;
-            const maxChar = Math.max(s.oa.length, (s.ob || "").length, (s.oc || "").length);
-            
-            let opsiHTML = "";
-            if (kls <= 2) {
-                // Perbaikan: Opsi sejajar simetris dan renggang untuk Kelas 1 & 2
-                if (hasImgOpsi) {
-                    opsiHTML = `<div class="stack-vertical">
-                        <div>a. ${renderOpsi(s.oa, s.imgOA)}</div>
-                        <div>b. ${renderOpsi(s.ob, s.imgOB)}</div>
-                        <div>c. ${renderOpsi(s.oc, s.imgOC)}</div>
-                    </div>`;
-                } else {
-                    // Opsi dibuat sejajar simetris dengan lebar kolom tetap (180px) agar lurus ke bawah
-                    opsiHTML = `<div style="display: flex; margin-top: 5px;">
-                        <div style="width: 180px; flex-shrink: 0;">a. ${s.oa}</div>
-                        <div style="width: 180px; flex-shrink: 0;">b. ${s.ob}</div>
-                        <div style="width: 180px; flex-shrink: 0;">c. ${s.oc}</div>
-                    </div>`;
-                }
-            } else {
-                opsiHTML = (maxChar > 25 || hasImgOpsi) 
-                    ? `<div class="stack-vertical"><div>a. ${renderOpsi(s.oa, s.imgOA)}</div><div>b. ${renderOpsi(s.ob, s.imgOB)}</div><div>c. ${renderOpsi(s.oc, s.imgOC)}</div><div>d. ${renderOpsi(s.od, s.imgOD)}</div></div>` 
-                    : `<div class="grid-2-col"><div>a. ${s.oa}</div><div>c. ${s.oc}</div><div>b. ${s.ob}</div><div>d. ${s.od}</div></div>`;
-            }
+document.getElementById('p-naskah').innerHTML = pg.map((s, i) => {
+    let teksTanya = s.tanya;
+    if (teksTanya.match(/\d[\.\)]/)) {
+        teksTanya = teksTanya.replace(/(\d+[\.\)])/g, '<br>$1');
+    }
 
-            let kontenSoal = "";
-            if (s.imgS) {
-                kontenSoal = `
-                <div style="display: flex; gap: 15px; align-items: flex-start; margin-bottom: 5px;">
-                    <img src="${s.imgS}" style="max-width: 160px; max-height: 140px; object-fit: contain; border: 1px solid #eee;">
-                    <div style="flex: 1; text-align: justify;">${teksTanya}</div>
-                </div>`;
-            } else {
-                kontenSoal = `<div style="margin-bottom: 5px; text-align: justify;">${teksTanya}</div>`;
-            }
-
-            return `
-            <div class="soal-row" style="margin-bottom: 15px; display: flex;">
-                <div style="width:25px; font-weight:bold; flex-shrink:0;">${i+1}.</div>
-                <div style="flex-grow:1;">
-                    ${kontenSoal}
-                    <div class="opsi-container">
-                        ${opsiHTML}
-                    </div>
-                </div>
+    const hasImgOpsi = s.imgOA || s.imgOB || s.imgOC || s.imgOD;
+    const maxChar = Math.max(s.oa.length, (s.ob || "").length, (s.oc || "").length);
+    
+    let opsiHTML = "";
+    if (kls <= 2) {
+        // Jika ada gambar ATAU teks sangat panjang, buat menurun (stack)
+        if (hasImgOpsi || maxChar > 25) { 
+            opsiHTML = `<div class="stack-vertical" style="margin-left: 10px;">
+                <div style="margin-bottom: 4px;">a. ${renderOpsi(s.oa, s.imgOA)}</div>
+                <div style="margin-bottom: 4px;">b. ${renderOpsi(s.ob, s.imgOB)}</div>
+                <div style="margin-bottom: 4px;">c. ${renderOpsi(s.oc, s.imgOC)}</div>
             </div>`;
-        }).join('');
+        } else {
+            // SEJAJAR SIMETRIS: Menggunakan persentase agar rapi di berbagai lebar kertas
+            opsiHTML = `<div style="display: flex; flex-wrap: wrap; margin-top: 5px; margin-left: 10px;">
+                <div style="width: 30%; min-width: 140px;">a. ${s.oa}</div>
+                <div style="width: 30%; min-width: 140px;">b. ${s.ob}</div>
+                <div style="width: 30%; min-width: 140px;">c. ${s.oc}</div>
+            </div>`;
+        }
+    } else {
+        // KELAS 3-6: Jika panjang buat menurun, jika pendek buat 2 kolom (grid)
+        opsiHTML = (maxChar > 30 || hasImgOpsi) 
+            ? `<div class="stack-vertical" style="margin-left: 10px;"><div>a. ${renderOpsi(s.oa, s.imgOA)}</div><div>b. ${renderOpsi(s.ob, s.imgOB)}</div><div>c. ${renderOpsi(s.oc, s.imgOC)}</div><div>d. ${renderOpsi(s.od, s.imgOD)}</div></div>` 
+            : `<div class="grid-2-col" style="margin-left: 10px;"><div>a. ${s.oa}</div><div>c. ${s.oc}</div><div>b. ${s.ob}</div><div>d. ${s.od}</div></div>`;
+    }
+
+    // Layout Pertanyaan (Gambar Stimulus)
+    let kontenSoal = "";
+    if (s.imgS) {
+        kontenSoal = `
+        <div style="display: flex; gap: 15px; align-items: flex-start; margin-bottom: 5px;">
+            <img src="${s.imgS}" style="max-width: 180px; max-height: 150px; object-object: contain; border: 1px solid #eee;">
+            <div style="flex: 1; text-align: justify;">${teksTanya}</div>
+        </div>`;
+    } else {
+        kontenSoal = `<div style="margin-bottom: 5px; text-align: justify;">${teksTanya}</div>`;
+    }
+
+    return `
+    <div class="soal-row" style="margin-bottom: 18px; display: flex;">
+        <div style="width:25px; font-weight:bold; flex-shrink:0;">${i+1}.</div>
+        <div style="flex-grow:1;">
+            ${kontenSoal}
+            <div class="opsi-container">
+                ${opsiHTML}
+            </div>
+        </div>
+    </div>`;
+}).join('');
 
         // Tampilkan header esai jika ada soal esai dan beri jarak
         if (esai.length > 0) {
@@ -544,3 +548,4 @@
 </script>
 </body>
 </html>
+
