@@ -30,7 +30,7 @@
         .login-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 350px; }
 
         @media print {
-            @page { size: A4; margin: 1cm 1.5cm 1.2cm 1.5cm; } /* Margin dioptimalkan lebih rapat */
+            @page { size: A4; margin: 1cm 1.5cm 1.2cm 1.5cm; }
             body { background: white !important; }
             .no-print { display: none !important; }
             .print-only { display: block !important; }
@@ -248,6 +248,7 @@
                     Berilah tanda silang (X) pada huruf a, b, c atau d untuk jawaban yang paling benar!
                 </div>
                 <div id="p-naskah"></div>
+                <div id="p-header-esai" style="font-weight:bold; margin-top:40px; margin-bottom:10px; display:none;">Isilah titik-titik di bawah ini dengan jawaban yang benar!</div>
                 <div id="p-naskah-esai"></div>
             </div>
 
@@ -349,12 +350,8 @@
         const mapelDasar = ["Pendidikan Pancasila", "Matematika", "Seni Budaya", "Bahasa Indonesia", "Bahasa Sunda"];
         
         let opts = [];
-        if(currentUser.role === 'guru_pai') { 
-            opts = ["PAI"]; 
-        } 
-        else if(currentUser.role === 'guru_inggris') { 
-            opts = ["Bahasa Inggris"]; 
-        } 
+        if(currentUser.role === 'guru_pai') { opts = ["PAI"]; } 
+        else if(currentUser.role === 'guru_inggris') { opts = ["Bahasa Inggris"]; } 
         else if(currentUser.role === 'admin') {
             opts = ["PAI", ...mapelDasar, "Bahasa Inggris"];
             if(parseInt(k) >= 3) opts.push("IPAS");
@@ -411,18 +408,19 @@
             
             let opsiHTML = "";
             if (kls <= 2) {
+                // Perbaikan: Opsi sejajar simetris dan renggang untuk Kelas 1 & 2
                 if (hasImgOpsi) {
-                    opsiHTML = `<div class="stack-vertical" style="gap: 15px; margin-top: 10px;">
+                    opsiHTML = `<div class="stack-vertical">
                         <div>a. ${renderOpsi(s.oa, s.imgOA)}</div>
                         <div>b. ${renderOpsi(s.ob, s.imgOB)}</div>
                         <div>c. ${renderOpsi(s.oc, s.imgOC)}</div>
                     </div>`;
                 } else {
-                    // SEJAJAR SIMETRIS: Menggunakan min-width dan gap besar agar renggang
-                    opsiHTML = `<div style="display: flex; gap: 60px; margin-top: 10px; flex-wrap: wrap;">
-                        <div style="min-width: 130px;">a. ${s.oa}</div>
-                        <div style="min-width: 130px;">b. ${s.ob}</div>
-                        <div style="min-width: 130px;">c. ${s.oc}</div>
+                    // Opsi dibuat sejajar simetris dengan lebar kolom tetap (180px) agar lurus ke bawah
+                    opsiHTML = `<div style="display: flex; margin-top: 5px;">
+                        <div style="width: 180px; flex-shrink: 0;">a. ${s.oa}</div>
+                        <div style="width: 180px; flex-shrink: 0;">b. ${s.ob}</div>
+                        <div style="width: 180px; flex-shrink: 0;">c. ${s.oc}</div>
                     </div>`;
                 }
             } else {
@@ -454,14 +452,14 @@
             </div>`;
         }).join('');
 
-        // Merender bagian Esai dengan Jarak dan Instruksi
-        const instruksiEsai = esai.length > 0 ? `
-            <div style="margin-top: 40px; border-top: 2px solid black; padding-top: 15px; margin-bottom: 15px;">
-                <b style="text-transform: uppercase;">Isilah titik-titik di bawah ini dengan jawaban yang benar!</b>
-            </div>
-        ` : "";
+        // Tampilkan header esai jika ada soal esai dan beri jarak
+        if (esai.length > 0) {
+            document.getElementById('p-header-esai').style.display = 'block';
+        } else {
+            document.getElementById('p-header-esai').style.display = 'none';
+        }
 
-        document.getElementById('p-naskah-esai').innerHTML = instruksiEsai + esai.map((s, i) => {
+        document.getElementById('p-naskah-esai').innerHTML = esai.map((s, i) => {
             let teksTanyaEsai = s.tanya;
             if (teksTanyaEsai.match(/\d[\.\)]/)) {
                 teksTanyaEsai = teksTanyaEsai.replace(/(\d+[\.\)])/g, '<br>$1');
@@ -470,19 +468,7 @@
         }).join('');
 
         document.getElementById('p-kunci').innerHTML = soals.map((s, i) => `<tr><td style="text-align:center;">${i+1}</td><td>${s.kunci}</td><td style="text-align:center;">${s.skor}</td></tr>`).join('');
-        
-        // Memunculkan nomor soal di list input agar mudah diedit
-        document.getElementById('listSoal').innerHTML = soals.map((s, i) => `
-            <div class="card" style="display:flex; justify-content:space-between; align-items:center; border-left: 5px solid var(--a);">
-                <div>
-                    <span style="background: var(--p); color: white; padding: 2px 8px; border-radius: 4px; margin-right: 10px; font-size: 12px;">#${i + 1}</span>
-                    <b>[${s.lv}]</b> ${s.tanya.substring(0,60)}...
-                </div>
-                <div>
-                    <button class="btn-sm btn-blue" onclick="editSoal('${s.id}')">Edit</button>
-                    <button class="btn-sm btn-red" onclick="if(confirm('Hapus soal nomor ${i + 1}?')) db.ref('kkg_soal/${s.id}').remove()">X</button>
-                </div>
-            </div>`).join('');
+        document.getElementById('listSoal').innerHTML = soals.map(s => `<div class="card" style="display:flex; justify-content:space-between; align-items:center;"><div><b>[${s.lv}]</b> ${s.tanya.substring(0,60)}...</div><div><button class="btn-sm btn-blue" onclick="editSoal('${s.id}')">Edit</button><button class="btn-sm btn-red" onclick="if(confirm('Hapus soal?')) db.ref('kkg_soal/${s.id}').remove()">X</button></div></div>`).join('');
     }
 
     function updateStats(soals) {
