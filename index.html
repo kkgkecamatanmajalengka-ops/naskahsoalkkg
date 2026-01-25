@@ -442,7 +442,18 @@
             return `<div class="soal-row"><div style="width:30px; font-weight:bold; flex-shrink:0;">${i+1}.</div><div style="flex-grow:1;"><div>${s.imgS ? `<img src="${s.imgS}" class="img-naskah">` : ''} ${s.tanya}</div><div class="opsi-container">${opsiHTML}</div></div></div>`;
         }).join('');
 
-        document.getElementById('p-naskah-esai').innerHTML = esai.map((s, i) => `<div class="soal-row"><div style="width:30px; font-weight:bold; flex-shrink:0;">${pg.length + i + 1}.</div><div style="flex-grow:1;">${s.tanya}</div></div>`).join('');
+        // Kode BARU:
+document.getElementById('p-naskah-esai').innerHTML = esai.map((s, i) => {
+    // Menambahkan logika perapian teks untuk esai
+    let teksTanyaEsai = s.tanya;
+    if (teksTanyaEsai.match(/\d[\.\)]/)) {
+        teksTanyaEsai = teksTanyaEsai.replace(/(\d+[\.\)])/g, '<br>$1');
+    }
+    return `<div class="soal-row">
+                <div style="width:30px; font-weight:bold; flex-shrink:0;">${pg.length + i + 1}.</div>
+                <div style="flex-grow:1;">${teksTanyaEsai}</div>
+            </div>`;
+}).join('');
         document.getElementById('p-kunci').innerHTML = soals.map((s, i) => `<tr><td style="text-align:center;">${i+1}</td><td>${s.kunci}</td><td style="text-align:center;">${s.skor}</td></tr>`).join('');
         document.getElementById('listSoal').innerHTML = soals.map(s => `<div class="card" style="display:flex; justify-content:space-between; align-items:center;"><div><b>[${s.lv}]</b> ${s.tanya.substring(0,60)}...</div><div><button class="btn-sm btn-blue" onclick="editSoal('${s.id}')">Edit</button><button class="btn-sm btn-red" onclick="if(confirm('Hapus soal?')) db.ref('kkg_soal/${s.id}').remove()">X</button></div></div>`).join('');
     }
@@ -521,4 +532,5 @@
 </script>
 </body>
 </html>
+
 
