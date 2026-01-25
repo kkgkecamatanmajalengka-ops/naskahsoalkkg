@@ -402,36 +402,70 @@
         const esai = soals.filter(x => x.bentuk === 'Esai');
 
         document.getElementById('p-naskah').innerHTML = pg.map((s, i) => {
-            // LOGIKA MERAPIKAN URUTAN ANGKA (SOAL MENYUSUN)
             let teksTanya = s.tanya;
             if (teksTanya.match(/\d[\.\)]/)) {
                 teksTanya = teksTanya.replace(/(\d+[\.\)])/g, '<br>$1');
             }
 
             const hasImgOpsi = s.imgOA || s.imgOB || s.imgOC || s.imgOD;
-            const totalChar = (s.oa + s.ob + s.oc + (s.od || "")).length;
-            const isPanjang = totalChar > 55 || s.imgS || hasImgOpsi;
-
+            // Deteksi panjang teks untuk menentukan kapan harus ganti baris (menurun)
+            const maxChar = Math.max(s.oa.length, (s.ob || "").length, (s.oc || "").length);
+            
             let opsiHTML = "";
             if (kls <= 2) {
-                opsiHTML = isPanjang 
-                    ? `<div class="stack-vertical"><div>a. ${renderOpsi(s.oa, s.imgOA)}</div><div>b. ${renderOpsi(s.ob, s.imgOB)}</div><div>c. ${renderOpsi(s.oc, s.imgOC)}</div></div>` 
-                    : `<div class="flex-inline"><span>a. ${s.oa}</span><span>b. ${s.ob}</span><span>c. ${s.oc}</span></div>`;
+                // KELAS 1-2: Jika teks panjang atau ada gambar, opsi disusun menurun
+                if (hasImgOpsi || maxChar > 20) {
+                    opsiHTML = `<div class="stack-vertical">
+                        <div>a. ${renderOpsi(s.oa, s.imgOA)}</div>
+                        <div>b. ${renderOpsi(s.ob, s.imgOB)}</div>
+                        <div>c. ${renderOpsi(s.oc, s.imgOC)}</div>
+                    </div>`;
+                } else {
+                    // SEJAJAR SIMETRIS: Menggunakan lebar kolom 150px agar huruf a, b, c lurus ke bawah
+                    opsiHTML = `<div style="display: flex; margin-top: 5px;">
+                        <div style="width: 150px; flex-shrink: 0;">a. ${s.oa}</div>
+                        <div style="width: 150px; flex-shrink: 0;">b. ${s.ob}</div>
+                        <div style="width: 150px; flex-shrink: 0;">c. ${s.oc}</div>
+                    </div>`;
+                }
             } else {
-                opsiHTML = isPanjang 
+                // KELAS 3-6: Standar 2 kolom atau menurun jika panjang
+                opsiHTML = (maxChar > 25 || hasImgOpsi) 
                     ? `<div class="stack-vertical"><div>a. ${renderOpsi(s.oa, s.imgOA)}</div><div>b. ${renderOpsi(s.ob, s.imgOB)}</div><div>c. ${renderOpsi(s.oc, s.imgOC)}</div><div>d. ${renderOpsi(s.od, s.imgOD)}</div></div>` 
                     : `<div class="grid-2-col"><div>a. ${s.oa}</div><div>c. ${s.oc}</div><div>b. ${s.ob}</div><div>d. ${s.od}</div></div>`;
             }
 
-            return `<div class="soal-row"><div style="width:30px; font-weight:bold; flex-shrink:0;">${i+1}.</div><div style="flex-grow:1;"><div>${s.imgS ? `<img src="${s.imgS}" class="img-naskah">` : ''} ${teksTanya}</div><div class="opsi-container">${opsiHTML}</div></div></div>`;
+            // Layout Soal: Gambar di samping teks
+            let kontenSoal = "";
+            if (s.imgS) {
+                kontenSoal = `
+                <div style="display: flex; gap: 15px; align-items: flex-start; margin-bottom: 5px;">
+                    <img src="${s.imgS}" style="max-width: 160px; max-height: 140px; object-fit: contain; border: 1px solid #eee;">
+                    <div style="flex: 1; text-align: justify;">${teksTanya}</div>
+                </div>`;
+            } else {
+                kontenSoal = `<div style="margin-bottom: 5px; text-align: justify;">${teksTanya}</div>`;
+            }
+
+            return `
+            <div class="soal-row" style="margin-bottom: 15px; display: flex;">
+                <div style="width:25px; font-weight:bold; flex-shrink:0;">${i+1}.</div>
+                <div style="flex-grow:1;">
+                    ${kontenSoal}
+                    <div class="opsi-container">
+                        ${opsiHTML}
+                    </div>
+                </div>
+            </div>`;
         }).join('');
 
+        // Merender bagian Esai
         document.getElementById('p-naskah-esai').innerHTML = esai.map((s, i) => {
             let teksTanyaEsai = s.tanya;
             if (teksTanyaEsai.match(/\d[\.\)]/)) {
                 teksTanyaEsai = teksTanyaEsai.replace(/(\d+[\.\)])/g, '<br>$1');
             }
-            return `<div class="soal-row"><div style="width:30px; font-weight:bold; flex-shrink:0;">${pg.length + i + 1}.</div><div style="flex-grow:1;">${teksTanyaEsai}</div></div>`;
+            return `<div class="soal-row"><div style="width:25px; font-weight:bold; flex-shrink:0;">${pg.length + i + 1}.</div><div style="flex-grow:1; text-align: justify;">${teksTanyaEsai}</div></div>`;
         }).join('');
 
         document.getElementById('p-kunci').innerHTML = soals.map((s, i) => `<tr><td style="text-align:center;">${i+1}</td><td>${s.kunci}</td><td style="text-align:center;">${s.skor}</td></tr>`).join('');
@@ -511,3 +545,4 @@
 </script>
 </body>
 </html>
+
