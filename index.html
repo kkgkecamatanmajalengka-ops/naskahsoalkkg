@@ -52,7 +52,7 @@
                 margin-bottom: 18px !important; 
                 align-items: flex-start; 
                 text-align: justify; 
-                line-height: 1.3;
+                line-height: 1.4; /* Perbaikan line height */
             }
             table tr { page-break-inside: avoid !important; break-inside: avoid; }
             .page-section { page-break-after: always; padding: 0; margin: 0; border: none; }
@@ -423,12 +423,19 @@
         const esai = soals.filter(x => x.bentuk === 'Esai');
 
         document.getElementById('p-naskah').innerHTML = pg.map((s, i) => {
+            // PERBAIKAN LOGIKA RAPIH: Deteksi Angka dan Pindah Baris
             let teksTanya = s.tanya;
             
-            if (teksTanya.match(/\d[\.\)]/)) {
-                teksTanya = teksTanya.replace(/(\d+[\.\)])/g, '<br>$1');
-            }
+            // Otomatis pindah baris pada angka (1., 2., 3.) agar rapi
+            teksTanya = teksTanya.replace(/(\d+[\.\)])/g, '<br>$1');
             
+            // Tambahkan indentasi pada baris-baris list agar sejajar rapi
+            teksTanya = teksTanya.split('<br>').map((line, index) => {
+                if (index > 0) return `<div style="padding-left: 20px;">${line}</div>`;
+                return line;
+            }).join('');
+            
+            // Deteksi pertanyaan akhir untuk ditebalkan
             const pemisahPertanyaan = teksTanya.split(/(\.{3,}|\?)/);
             if (pemisahPertanyaan.length > 1) {
                 const isiTanya = pemisahPertanyaan.pop(); 
@@ -500,9 +507,7 @@
 
         document.getElementById('p-naskah-esai').innerHTML = esai.map((s, i) => {
             let teksTanyaEsai = s.tanya;
-            if (teksTanyaEsai.match(/\d[\.\)]/)) {
-                teksTanyaEsai = teksTanyaEsai.replace(/(\d+[\.\)])/g, '<br>$1');
-            }
+            teksTanyaEsai = teksTanyaEsai.replace(/(\d+[\.\)])/g, '<br>$1');
             return `<div class="soal-row"><div style="width:25px; font-weight:bold; flex-shrink:0;">${pg.length + i + 1}.</div><div style="flex-grow:1; text-align: justify;">${teksTanyaEsai}</div></div>`;
         }).join('');
 
@@ -581,13 +586,11 @@
         document.getElementById('db-st').style.color = s.val() ? "#10b981" : "#ef4444";
     });
 
-    // FUNGSI BARU: SIMPAN KE WORD TANPA MERUBAH FORMAT
     function exportToWord() {
         const content = document.getElementById('printArea').innerHTML;
         const mapel = document.getElementById('p-mapel-val').innerText || "Soal";
         const kls = document.getElementById('p-kls-val').innerText || "";
         
-        // CSS Internal khusus untuk Word agar mengenali styling HTML Anda
         const css = `
             <style>
                 @page Section1 { size: 210mm 297mm; margin: 1cm 1.5cm 1.2cm 1.5cm; }
