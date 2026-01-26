@@ -52,7 +52,7 @@
                 margin-bottom: 18px !important; 
                 align-items: flex-start; 
                 text-align: justify; 
-                line-height: 1.4; /* Perbaikan line height */
+                line-height: 1.4;
             }
             table tr { page-break-inside: avoid !important; break-inside: avoid; }
             .page-section { page-break-after: always; padding: 0; margin: 0; border: none; }
@@ -423,19 +423,21 @@
         const esai = soals.filter(x => x.bentuk === 'Esai');
 
         document.getElementById('p-naskah').innerHTML = pg.map((s, i) => {
-            // PERBAIKAN LOGIKA RAPIH: Deteksi Angka dan Pindah Baris
+            // LOGIKA PERBAIKAN RAPIH: Mengatur Indentasi dan Baris Baru Otomatis
             let teksTanya = s.tanya;
             
-            // Otomatis pindah baris pada angka (1., 2., 3.) agar rapi
+            // 1. Deteksi angka (1. 2. 3. dst) dan jadikan baris baru
             teksTanya = teksTanya.replace(/(\d+[\.\)])/g, '<br>$1');
             
-            // Tambahkan indentasi pada baris-baris list agar sejajar rapi
+            // 2. Berikan indentasi/padding kiri untuk baris-baris list tersebut agar rapi sejajar
             teksTanya = teksTanya.split('<br>').map((line, index) => {
-                if (index > 0) return `<div style="padding-left: 20px;">${line}</div>`;
+                if (index > 0) {
+                    return `<div style="padding-left: 18px; text-indent: -18px; margin-top:2px;">${line}</div>`;
+                }
                 return line;
             }).join('');
             
-            // Deteksi pertanyaan akhir untuk ditebalkan
+            // 3. Deteksi pertanyaan di akhir (setelah list) untuk ditebalkan (bold)
             const pemisahPertanyaan = teksTanya.split(/(\.{3,}|\?)/);
             if (pemisahPertanyaan.length > 1) {
                 const isiTanya = pemisahPertanyaan.pop(); 
@@ -507,6 +509,7 @@
 
         document.getElementById('p-naskah-esai').innerHTML = esai.map((s, i) => {
             let teksTanyaEsai = s.tanya;
+            // Perbaikan tampilan list pada esai juga
             teksTanyaEsai = teksTanyaEsai.replace(/(\d+[\.\)])/g, '<br>$1');
             return `<div class="soal-row"><div style="width:25px; font-weight:bold; flex-shrink:0;">${pg.length + i + 1}.</div><div style="flex-grow:1; text-align: justify;">${teksTanyaEsai}</div></div>`;
         }).join('');
