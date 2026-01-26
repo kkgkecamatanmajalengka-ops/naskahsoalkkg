@@ -409,115 +409,87 @@
     }
 
     function renderAll(soals, kls) {
-        const romawi = ["I", "II", "III", "IV", "V", "VI"];
-        const teksKls = ["Satu", "Dua", "Tiga", "Empat", "Lima", "Enam"];
-        document.getElementById('p-mapel-val').innerText = document.getElementById('selMapel').value;
-        document.getElementById('p-kls-val').innerText = romawi[kls-1] + " (" + teksKls[kls-1] + ")";
+    const romawi = ["I", "II", "III", "IV", "V", "VI"];
+    const teksKls = ["Satu", "Dua", "Tiga", "Empat", "Lima", "Enam"];
+    document.getElementById('p-mapel-val').innerText = document.getElementById('selMapel').value;
+    document.getElementById('p-kls-val').innerText = romawi[kls-1] + " (" + teksKls[kls-1] + ")";
 
-        document.getElementById('p-kisi').innerHTML = soals.map((s, i) => {
-            const dataTP = cacheTP.find(x => x.tp.trim() === s.tp.trim());
-            return `<tr><td>${i+1}</td><td>${dataTP ? dataTP.e : "-"}</td><td>${s.tp}</td><td>${s.ind}</td><td>${s.lv}</td><td>${s.bentuk}</td></tr>`;
-        }).join('');
+    document.getElementById('p-kisi').innerHTML = soals.map((s, i) => {
+        const dataTP = cacheTP.find(x => x.tp.trim() === s.tp.trim());
+        return `<tr><td>${i+1}</td><td>${dataTP ? dataTP.e : "-"}</td><td>${s.tp}</td><td>${s.ind}</td><td>${s.lv}</td><td>${s.bentuk}</td></tr>`;
+    }).join('');
 
-        const pg = soals.filter(x => x.bentuk === 'PG');
-        const esai = soals.filter(x => x.bentuk === 'Esai');
+    const pg = soals.filter(x => x.bentuk === 'PG');
+    const esai = soals.filter(x => x.bentuk === 'Esai');
 
-        document.getElementById('p-naskah').innerHTML = pg.map((s, i) => {
-            // LOGIKA PERBAIKAN RAPIH: Mengatur Indentasi dan Baris Baru Otomatis
-            let teksTanya = s.tanya;
-            
-            // 1. Deteksi angka (1. 2. 3. dst) dan jadikan baris baru
-            teksTanya = teksTanya.replace(/(\d+[\.\)])/g, '<br>$1');
-            
-            // 2. Berikan indentasi/padding kiri untuk baris-baris list tersebut agar rapi sejajar
-            teksTanya = teksTanya.split('<br>').map((line, index) => {
-                if (index > 0) {
-                    return `<div style="padding-left: 18px; text-indent: -18px; margin-top:2px;">${line}</div>`;
-                }
-                return line;
-            }).join('');
-            
-            // 3. Deteksi pertanyaan di akhir (setelah list) untuk ditebalkan (bold)
-            const pemisahPertanyaan = teksTanya.split(/(\.{3,}|\?)/);
-            if (pemisahPertanyaan.length > 1) {
-                const isiTanya = pemisahPertanyaan.pop(); 
-                const tanda = pemisahPertanyaan.pop();    
-                const stimulus = pemisahPertanyaan.join("");
-                teksTanya = stimulus + tanda + `<div style="margin-top:10px; font-weight:bold;">` + isiTanya + `</div>`;
-            }
-
-            const hasImgOpsi = s.imgOA || s.imgOB || s.imgOC || s.imgOD;
-            const maxChar = Math.max(s.oa.length, (s.ob || "").length, (s.oc || "").length, (s.od || "").length);
-            
-            let opsiHTML = "";
-            if (kls <= 2) {
-                if (hasImgOpsi || maxChar > 20) {
-                    opsiHTML = `<div class="stack-vertical" style="margin-left: 5px;">
-                        <div>a. ${renderOpsi(s.oa, s.imgOA)}</div>
-                        <div>b. ${renderOpsi(s.ob, s.imgOB)}</div>
-                        <div>c. ${renderOpsi(s.oc, s.imgOC)}</div>
-                    </div>`;
-                } else {
-                    opsiHTML = `<div style="display: grid; grid-template-columns: 180px 180px 180px; margin-top: 5px; margin-left: 5px;">
-                        <div style="min-width: 60px;">a. ${s.oa}</div>
-                        <div style="min-width: 60px;">b. ${s.ob}</div>
-                        <div style="min-width: 60px;">c. ${s.oc}</div>
-                    </div>`;
-                }
-            } else {
-                if (hasImgOpsi || maxChar > 25) {
-                    opsiHTML = `<div class="stack-vertical" style="margin-left: 5px;">
-                        <div>a. ${renderOpsi(s.oa, s.imgOA)}</div>
-                        <div>b. ${renderOpsi(s.ob, s.imgOB)}</div>
-                        <div>c. ${renderOpsi(s.oc, s.imgOC)}</div>
-                        <div>d. ${renderOpsi(s.od, s.imgOD)}</div>
-                    </div>`;
-                } else {
-                    opsiHTML = `<div style="display: grid; grid-template-columns: 280px 280px; gap: 5px; width: 100%; margin-left: 5px;">
-                        <div>a. ${s.oa}</div><div>c. ${s.oc}</div>
-                        <div>b. ${s.ob}</div><div>d. ${s.od}</div>
-                    </div>`;
-                }
-            }
-
-            let kontenSoal = "";
-            if (s.imgS) {
-                kontenSoal = `
-                <div style="display: flex; gap: 15px; align-items: flex-start; margin-bottom: 5px;">
-                    <img src="${s.imgS}" style="max-width: 170px; max-height: 140px; object-fit: contain; border: 1px solid #eee;">
-                    <div style="flex: 1; text-align: justify;">${teksTanya}</div>
-                </div>`;
-            } else {
-                kontenSoal = `<div style="margin-bottom: 5px; text-align: justify;">${teksTanya}</div>`;
-            }
-
-            return `
-            <div class="soal-row">
-                <div style="width:25px; font-weight:bold; flex-shrink:0;">${i+1}.</div>
-                <div style="flex-grow:1;">
-                    ${kontenSoal}
-                    <div class="opsi-container">
-                        ${opsiHTML}
-                    </div>
-                </div>
-            </div>`;
-        }).join('');
-
-        if (esai.length > 0) {
-            document.getElementById('p-header-esai').style.display = 'block';
+    document.getElementById('p-naskah').innerHTML = pg.map((s, i) => {
+        let teksTanya = s.tanya;
+        
+        // PERBAIKAN: Deteksi angka 1. 2. 3. dan buat baris baru otomatis dengan indentasi rapi
+        if (teksTanya.match(/\d[\.\)]/)) {
+            teksTanya = teksTanya.replace(/(\d+[\.\)])/g, '<br><span style="display:inline-block; width:20px; padding-left:5px;">$1</span>');
+        }
+        
+        // Menebalkan kalimat pertanyaan di akhir stimulus
+        const pemisahPertanyaan = teksTanya.split(/(\.{3,}|\?)/);
+        if (pemisahPertanyaan.length > 1) {
+            const isiTanya = pemisahPertanyaan.pop(); 
+            const tanda = pemisahPertanyaan.pop();    
+            const stimulus = pemisahPertanyaan.join("");
+            teksTanya = stimulus + tanda + `<div style="margin-top:8px; font-weight:bold; padding-left:5px;">` + isiTanya + `</div>`;
         }
 
-        document.getElementById('p-naskah-esai').innerHTML = esai.map((s, i) => {
-            let teksTanyaEsai = s.tanya;
-            // Perbaikan tampilan list pada esai juga
-            teksTanyaEsai = teksTanyaEsai.replace(/(\d+[\.\)])/g, '<br>$1');
-            return `<div class="soal-row"><div style="width:25px; font-weight:bold; flex-shrink:0;">${pg.length + i + 1}.</div><div style="flex-grow:1; text-align: justify;">${teksTanyaEsai}</div></div>`;
-        }).join('');
+        const hasImgOpsi = s.imgOA || s.imgOB || s.imgOC || s.imgOD;
+        const maxChar = Math.max(s.oa.length, (s.ob || "").length, (s.oc || "").length, (s.od || "").length);
+        
+        let opsiHTML = "";
+        if (kls <= 2) {
+            // Layout Opsi Kelas Rendah (A, B, C)
+            opsiHTML = `<div class="stack-vertical" style="margin-left: 25px; margin-top:5px;">
+                <div>a. ${renderOpsi(s.oa, s.imgOA)}</div>
+                <div>b. ${renderOpsi(s.ob, s.imgOB)}</div>
+                <div>c. ${renderOpsi(s.oc, s.imgOC)}</div>
+            </div>`;
+        } else {
+            // Layout Opsi Kelas Tinggi (A, B, C, D)
+            opsiHTML = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-left: 25px; margin-top:5px;">
+                <div>a. ${renderOpsi(s.oa, s.imgOA)}</div>
+                <div>c. ${renderOpsi(s.oc, s.imgOC)}</div>
+                <div>b. ${renderOpsi(s.ob, s.imgOB)}</div>
+                <div>d. ${renderOpsi(s.od, s.imgOD)}</div>
+            </div>`;
+        }
 
-        document.getElementById('p-kunci').innerHTML = soals.map((s, i) => `<tr><td style="text-align:center;">${i+1}</td><td>${s.kunci}</td><td style="text-align:center;">${s.skor}</td></tr>`).join('');
-        document.getElementById('listSoal').innerHTML = soals.map(s => `<div class="card" style="display:flex; justify-content:space-between; align-items:center;"><div><b>[${s.lv}]</b> ${s.tanya.substring(0,60)}...</div><div><button class="btn-sm btn-blue" onclick="editSoal('${s.id}')">Edit</button><button class="btn-sm btn-red" onclick="if(confirm('Hapus soal?')) db.ref('kkg_soal/${s.id}').remove()">X</button></div></div>`).join('');
+        let kontenSoal = `<div style="text-align: justify; line-height:1.5;">${teksTanya}</div>`;
+        if (s.imgS) {
+            kontenSoal = `
+            <div style="display: flex; gap: 15px; align-items: flex-start; margin-bottom: 5px;">
+                <img src="${s.imgS}" style="max-width: 180px; max-height: 150px; object-fit: contain; border: 1px solid #ddd; padding:2px;">
+                <div style="flex: 1; text-align: justify;">${teksTanya}</div>
+            </div>`;
+        }
+
+        return `
+        <div class="soal-row" style="margin-bottom: 20px;">
+            <div style="width:25px; font-weight:bold; flex-shrink:0;">${i+1}.</div>
+            <div style="flex-grow:1;">
+                ${kontenSoal}
+                <div class="opsi-container">${opsiHTML}</div>
+            </div>
+        </div>`;
+    }).join('');
+
+    // Render Esai (jika ada)
+    if (esai.length > 0) {
+        document.getElementById('p-header-esai').style.display = 'block';
     }
+    document.getElementById('p-naskah-esai').innerHTML = esai.map((s, i) => {
+        let teksTanyaEsai = s.tanya;
+        return `<div class="soal-row"><div style="width:25px; font-weight:bold;">${pg.length + i + 1}.</div><div style="flex-grow:1;">${teksTanyaEsai}</div></div>`;
+    }).join('');
 
+    document.getElementById('p-kunci').innerHTML = soals.map((s, i) => `<tr><td>${i+1}</td><td>${s.kunci}</td><td>${s.skor}</td></tr>`).join('');
+}
     function updateStats(soals) {
         const t = soals.length; if (t === 0) return;
         const l1 = soals.filter(x => x.lv === 'L1').length, l2 = soals.filter(x => x.lv === 'L2').length, l3 = soals.filter(x => x.lv === 'L3').length;
@@ -622,3 +594,4 @@
 </script>
 </body>
 </html>
+
